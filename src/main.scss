@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+$slate-blue: #5053D0;
+$gold: #C3924A;
+$ruby: #ff0a03;
+$grey: #BFBFBF;
+$grey2: #989797;
+$grey3: #AAAAAA;
+
+$primary: $slate-blue;
+
+$my-warning: #FF5555;
+
+.bg-slate-blue {
+  background: #ff0a03;
+}
+
+.bg-ruby {
+  background: $ruby;
+}
+
+$light: #EBEBEB;
+
+
+$font-family-base: 'Roboto', sans-serif;
+
+body {
+  font-family: $font-family-base;
+}
+
+$theme-colors: (
+        "primary": $gold,
+        "success": $slate-blue,
+        "secondary": $grey
+);
+
+@import "node_modules/bootstrap/scss/bootstrap";
+
+.btn {
+  color: white;
+  border-radius: 10px;
+}
+
+.btn.disabled {
+  color: white;
+  border-radius: 10px;
+}
+
+::placeholder {
+  color: $grey2;
+}
+
+.form-control {
+  border-color: $grey3;
+}
+
+.border-round {
+  border-radius: 20px;
+}
