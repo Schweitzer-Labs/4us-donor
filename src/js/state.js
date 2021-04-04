@@ -12,18 +12,6 @@ const set = (key, val) => {
   window.localStorage.setItem(elmAppId, newStateString)
 }
 
-export const setOnboardingToken = token => {
-  set('onboardingToken', token)
-}
-
-export const setPlaidPublicToken = token => {
-  set('plaidPublicToken', token)
-}
-
-export const setStripeCode = token => {
-  set('stripeCode', token)
-}
-
 export const getStateString = () => {
   return window.localStorage.getItem(elmAppId)
 }

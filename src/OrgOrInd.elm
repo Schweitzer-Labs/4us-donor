@@ -2,7 +2,6 @@ module OrgOrInd exposing (OrgOrInd(..), view)
 
 import Bootstrap.Button as Button
 import Bootstrap.Grid as Grid
-import Bootstrap.Utilities.Spacing as Spacing
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, id)
 
@@ -58,7 +57,7 @@ selectButton msg displayText value currentVal =
             [ color
             , Button.attrs [ id displayText ]
             , Button.block
-            , Button.attrs [ Spacing.mt4, Spacing.p2, class "font-weight-bold border-round" ]
+            , Button.attrs [ class "font-weight-bold border-round" ]
             , Button.onClick (msg value)
             ]
             [ text <| displayText ]

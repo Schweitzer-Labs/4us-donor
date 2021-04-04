@@ -1,4 +1,4 @@
-module ContributorType exposing (ContributorType, familyRadioList, orgView, toDataString, toDisplayString)
+module ContributorType exposing (ContributorType, familyRadioList, isLLC, llc, orgView, toDataString, toDisplayString)
 
 import Bootstrap.Form.Radio as Radio
 import Bootstrap.Form.Select as Select exposing (Item)
@@ -49,7 +49,7 @@ toDataString contributorType =
             "assoc"
 
         LimitedLiabilityCompany ->
-            "solep"
+            "llc"
 
         PoliticalActionCommittee ->
             "pac"
@@ -191,3 +191,13 @@ familyRadioList msg currentValue =
             ]
             "No"
         ]
+
+
+isLLC : ContributorType -> Bool
+isLLC contributorType =
+    contributorType == LimitedLiabilityCompany
+
+
+llc : ContributorType
+llc =
+    LimitedLiabilityCompany
