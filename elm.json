@@ -21,7 +21,8 @@
             "jzxhuang/http-extras": "2.1.0",
             "pablohirafuji/elm-qrcode": "4.0.1",
             "rtfeldman/elm-validate": "4.0.1",
-            "rundis/elm-bootstrap": "5.2.0"
+            "rundis/elm-bootstrap": "5.2.0",
+            "toastal/mailto": "5.0.0"
         },
         "indirect": {
             "avh4/elm-color": "1.0.0",
@@ -32,7 +33,8 @@
             "elm/virtual-dom": "1.0.2",
             "elm-community/list-extra": "8.2.4",
             "folkertdev/elm-flate": "2.0.4",
-            "justgook/elm-image": "4.0.0"
+            "justgook/elm-image": "4.0.0",
+            "toastal/endo": "1.1.0"
         }
     },
     "test-dependencies": {

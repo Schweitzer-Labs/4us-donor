@@ -1,7 +1,11 @@
 module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
 
 import AmountSelector
+import Asset
+import Bootstrap.Alert as Alert
+import Bootstrap.Form.Checkbox as Checkbox
 import Bootstrap.Form.Input as Input
+import Bootstrap.Form.Radio as Radio
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
@@ -9,15 +13,17 @@ import Bootstrap.Utilities.Spacing as Spacing
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import ContributorType exposing (ContributorType)
+import Copy
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
-import Http exposing (Error(..), Expect, emptyBody, expectString, expectStringResponse, jsonBody, post)
+import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
 import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (optional)
 import Json.Encode as Encode exposing (encode)
+import Mailto
 import OrgOrInd as OrgOrInd exposing (OrgOrInd(..))
+import SelectRadio
 import State
 import SubmitButton exposing (submitButton)
 import Task
@@ -37,7 +43,7 @@ type alias Model =
     , donorInfoValidated : Bool
     , paymentDetailsValidated : Bool
     , memberOwnership : String
-    , loading : Bool
+    , maybeIsSingleMemberLLC : Maybe Bool
     , emailAddress : String
     , phoneNumber : String
     , firstName : String
@@ -47,16 +53,23 @@ type alias Model =
     , city : String
     , state : String
     , postalCode : String
+    , employmentStatus : String
     , employer : String
+    , occupation : String
     , entityName : String
     , maybeOrgOrInd : Maybe OrgOrInd
     , maybeContributorType : Maybe ContributorType
+    , attestation : Bool
     , cardNumber : String
     , expirationMonth : String
     , expirationYear : String
     , cvv : String
     , amount : String
     , errors : List String
+    , submitMode : Bool
+    , submitting : Bool
+    , submitted : Bool
+    , remaining : Maybe Int
     }
 
 
@@ -70,7 +83,7 @@ init () =
       , donorInfoValidated = False
       , paymentDetailsValidated = False
       , memberOwnership = ""
-      , loading = False
+      , maybeIsSingleMemberLLC = Nothing
       , emailAddress = ""
       , phoneNumber = ""
       , firstName = ""
@@ -80,16 +93,23 @@ init () =
       , city = ""
       , state = ""
       , postalCode = ""
+      , employmentStatus = ""
       , employer = ""
+      , occupation = ""
       , entityName = ""
       , maybeContributorType = Nothing
       , maybeOrgOrInd = Nothing
+      , attestation = False
       , cardNumber = ""
       , expirationMonth = ""
       , expirationYear = ""
       , cvv = ""
       , amount = ""
       , errors = []
+      , submitMode = False
+      , submitting = False
+      , submitted = False
+      , remaining = Nothing
       }
     , Cmd.none
     )
@@ -103,12 +123,39 @@ type DisplayState
 
 view : Model -> Html Msg
 view model =
-    div
-        []
-        [ donationAmountView model
-        , provideDonorInfoView model
-        , providePaymentDetailsView model
-        ]
+    if model.submitted then
+        div [ class "text-center text-success display-4", Spacing.mt5 ]
+            [ h3 [] [ text "Thank you for contributing!" ]
+            , logoDiv
+            ]
+
+    else
+        let
+            donateButtonOrNot =
+                case ( model.submitMode, model.remaining ) of
+                    ( True, Just 0 ) ->
+                        sendMessageRows model
+
+                    ( True, Just _ ) ->
+                        [ div [ Spacing.m4 ] [ donateButton model ] ]
+
+                    _ ->
+                        []
+        in
+        div
+            []
+            ([ donationAmountView model
+             , provideDonorInfoView model
+             , providePaymentDetailsView model
+             ]
+                ++ donateButtonOrNot
+                ++ [ logoDiv ]
+            )
+
+
+logoDiv : Html Msg
+logoDiv =
+    div [ class "text-center" ] [ img [ Asset.src Asset.usLogo, class "logo-small", Spacing.mt4 ] [] ]
 
 
 frameContainer : DisplayState -> Html Msg -> List String -> Html Msg -> Msg -> Html Msg
@@ -130,7 +177,7 @@ frameContainer displayState title errors inputContent openMsg =
         Open ->
             Grid.containerFluid [ class "border-bottom", Spacing.pt3, Spacing.pb3 ] <|
                 [ Grid.row
-                    [ Row.attrs [ class "z-100" ] ]
+                    [ Row.attrs [] ]
                     [ Grid.col
                         []
                         [ h4 [ class "font-weight-bold" ] [ title ] ]
@@ -142,7 +189,7 @@ frameContainer displayState title errors inputContent openMsg =
                         (errorMessages errors)
                     ]
                 , Grid.row
-                    [ Row.attrs [ class "slide-in z-1" ] ]
+                    [ Row.attrs [] ]
                     [ Grid.col
                         []
                         [ inputContent ]
@@ -159,7 +206,16 @@ errorMessages errors =
         []
 
     else
-        [ ul [] <| List.map (\error -> li [ class "text-danger list-unstyled" ] [ text error ]) errors
+        [ Grid.containerFluid
+            []
+            [ Grid.row
+                []
+                [ Grid.col
+                    []
+                  <|
+                    List.map (\error -> div [ class "text-danger list-unstyled" ] [ text error ]) errors
+                ]
+            ]
         ]
 
 
@@ -182,7 +238,7 @@ donationAmountView model =
         model.donationAmountDisplayState
         title
         model.errors
-        (AmountSelector.view AmountUpdated model.amount SubmitAmount)
+        (AmountSelector.view AmountUpdated model.amount SubmitAmount (model.submitMode == False))
         OpenDonationAmount
 
 
@@ -217,10 +273,10 @@ provideDonorInfoView model =
         formRows =
             case model.maybeOrgOrInd of
                 Just Org ->
-                    orgRows model ++ piiRows model ++ [ employerRow model ] ++ [ submitDonorButtonRow ]
+                    orgRows model ++ piiRows model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
 
                 Just Ind ->
-                    piiRows model ++ [ employerRow model ] ++ familyRow model ++ [ submitDonorButtonRow ]
+                    piiRows model ++ employmentRows model ++ familyRow model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
 
                 Nothing ->
                     []
@@ -240,9 +296,17 @@ provideDonorInfoView model =
 
 providePaymentDetailsView : Model -> Html Msg
 providePaymentDetailsView model =
+    let
+        title =
+            if model.paymentDetailsValidated then
+                titleWithData "Payment Details" "Credit"
+
+            else
+                text "Payment Details"
+    in
     frameContainer
         model.paymentDetailsDisplayState
-        (text "Payment Details")
+        title
         model.errors
         (Grid.containerFluid
             []
@@ -255,6 +319,7 @@ type Msg
     = AmountUpdated String
     | ChooseOrgOrInd (Maybe OrgOrInd)
     | UpdateEmailAddress String
+    | UpdatePhoneNumber String
     | UpdateFirstName String
     | UpdateLastName String
     | UpdateAddress1 String
@@ -262,11 +327,15 @@ type Msg
     | UpdateCity String
     | UpdateState String
     | UpdatePostalCode String
+    | UpdateEmploymentStatus String
     | UpdateEmployer String
+    | UpdateOccupation String
     | UpdateOrganizationName String
     | UpdateOrganizationClassification (Maybe ContributorType)
+    | UpdateIsSingleMemberLLC String
     | UpdateMemberOwnership String
     | UpdateFamilyOrIndividual ContributorType
+    | UpdateAttestation Bool
     | UpdateCardNumber String
     | UpdateExpirationMonth String
     | UpdateExpirationYear String
@@ -300,13 +369,13 @@ toggleDisplayState model formView =
     in
     case formView of
         DonationAmount ->
-            { model | donationAmountDisplayState = Open, donorInfoDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, errors = [] }
+            { model | donationAmountDisplayState = Open, donorInfoDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, submitMode = False, errors = [] }
 
         DonorInfo ->
-            { model | donorInfoDisplayState = Open, donationAmountDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, errors = [] }
+            { model | donorInfoDisplayState = Open, donationAmountDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, submitMode = False, errors = [] }
 
         PaymentDetails ->
-            { model | paymentDetailsDisplayState = Open, donationAmountDisplayState = Closed, donorInfoDisplayState = Closed, errors = [] }
+            { model | paymentDetailsDisplayState = Open, donationAmountDisplayState = Closed, donorInfoDisplayState = Closed, submitMode = False, errors = [] }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -367,16 +436,22 @@ update msg model =
                     )
 
         ChooseOrgOrInd maybeOrgOrInd ->
-            ( { model | maybeOrgOrInd = maybeOrgOrInd, maybeContributorType = Nothing, errors = [] }, Cmd.none )
+            ( { model | maybeOrgOrInd = maybeOrgOrInd, maybeContributorType = Nothing, errors = [], submitMode = False }, Cmd.none )
 
         UpdateOrganizationName entityName ->
-            ( { model | entityName = entityName }, Cmd.none )
+            ( { model | entityName = entityName, submitMode = False }, Cmd.none )
 
         UpdateOrganizationClassification maybeContributorType ->
-            ( { model | maybeContributorType = maybeContributorType }, Cmd.none )
+            ( { model | maybeContributorType = maybeContributorType, submitMode = False }, Cmd.none )
 
         UpdateMemberOwnership str ->
             ( { model | memberOwnership = str }, Cmd.none )
+
+        UpdateIsSingleMemberLLC str ->
+            ( { model | maybeIsSingleMemberLLC = Just (stringToBool str) }, Cmd.none )
+
+        UpdatePhoneNumber str ->
+            ( { model | phoneNumber = str }, Cmd.none )
 
         UpdateEmailAddress str ->
             ( { model | emailAddress = str }, Cmd.none )
@@ -405,8 +480,17 @@ update msg model =
         UpdateFamilyOrIndividual contributorType ->
             ( { model | maybeContributorType = Just contributorType }, Cmd.none )
 
+        UpdateEmploymentStatus str ->
+            ( { model | employmentStatus = str }, Cmd.none )
+
         UpdateEmployer str ->
             ( { model | employer = str }, Cmd.none )
+
+        UpdateOccupation str ->
+            ( { model | occupation = str }, Cmd.none )
+
+        UpdateAttestation bool ->
+            ( { model | attestation = bool }, Cmd.none )
 
         UpdateCardNumber str ->
             ( { model | cardNumber = str }, Cmd.none )
@@ -421,7 +505,7 @@ update msg model =
             ( { model | expirationMonth = str, expirationYear = str }, Cmd.none )
 
         UpdateCVV str ->
-            ( { model | cvv = str }, Cmd.none )
+            ( { model | cvv = str, submitMode = False }, Cmd.none )
 
         SubmitPaymentInfo ->
             case validate paymentInfoValidator model of
@@ -429,30 +513,61 @@ update msg model =
                     ( { model | errors = messages }, Cmd.none )
 
                 _ ->
-                    ( { model | errors = [], loading = True }, postContribution model )
+                    ( { model | errors = [], submitting = True, paymentDetailsValidated = True }, postContribution model )
 
         GotAPIResponseContribute res ->
             case res of
                 Ok ( metadata, str ) ->
-                    ( { model | errors = [ str ] }, Cmd.none )
+                    ( { model | errors = [], submitted = True }, Cmd.none )
 
                 Err error ->
                     case error of
                         Http.Detailed.BadBody metadata body str ->
-                            ( { model | errors = [ "bad body: " ++ body ] }, Cmd.none )
+                            ( { model | errors = [ Copy.genericError ] }, Cmd.none )
 
                         Http.Detailed.BadStatus metadata body ->
-                            let
-                                errorMessageRes =
-                                    Decode.decodeString (Decode.field "errorMessage" Decode.string) body
+                            case metadata.statusCode of
+                                422 ->
+                                    ( { model | errors = [ Copy.paymentProcessingFailure ], submitting = False }, Cmd.none )
 
-                                errorMessage =
-                                    Result.withDefault "Oops! Something went wrong" errorMessageRes
-                            in
-                            ( { model | errors = [ errorMessage ] }, Cmd.none )
+                                _ ->
+                                    let
+                                        remainingRes =
+                                            Decode.decodeString (Decode.field "remaining" Decode.int) body
+                                    in
+                                    case remainingRes of
+                                        Err _ ->
+                                            ( { model | errors = [ Copy.genericError ], submitting = False }, Cmd.none )
+
+                                        Ok remaining ->
+                                            if remaining > 0 then
+                                                ( { model
+                                                    | errors = [ Copy.currentDonationExceedsLimit remaining ]
+                                                    , paymentDetailsDisplayState = Closed
+                                                    , donorInfoDisplayState = Closed
+                                                    , donationAmountDisplayState = Open
+                                                    , submitMode = True
+                                                    , submitting = False
+                                                    , remaining = Just remaining
+                                                  }
+                                                , Cmd.none
+                                                )
+
+                                            else
+                                                ( { model
+                                                    | errors = []
+                                                    , submitting = False
+                                                    , remaining = Just remaining
+                                                    , submitMode = True
+                                                    , donationAmountDisplayState = Closed
+                                                    , donorInfoDisplayState = Closed
+                                                    , paymentDetailsDisplayState = Closed
+                                                  }
+                                                , Cmd.none
+                                                )
 
                         _ ->
-                            ( { model | errors = [ "Oops! Something went wrong" ] }, Cmd.none )
+                            ( { model | errors = [ Copy.genericError ], submitting = False }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -468,14 +583,25 @@ main =
         }
 
 
-submitDonorButtonRow : Html Msg
-submitDonorButtonRow =
+submitDonorButtonRow : Bool -> Html Msg
+submitDonorButtonRow attestation =
     Grid.row
-        [ Row.attrs [ Spacing.mt5 ] ]
+        [ Row.attrs [ Spacing.mt2 ] ]
         [ Grid.col
             []
-            [ submitButton SubmitDonorInfo "Continue" False True ]
+            [ submitButton SubmitDonorInfo "Continue" False attestation ]
         ]
+
+
+donateButton : Model -> Html Msg
+donateButton model =
+    submitButton SubmitPaymentInfo "Donate!" model.submitting (model.submitting == False)
+
+
+sendMessageButton : Model -> Html Msg
+sendMessageButton model =
+    a [ Mailto.toHref Copy.contributionEmailHref, class "btn btn-primary btn-block" ]
+        [ text "Send Message" ]
 
 
 isLLCDonor : Model -> Bool
@@ -499,7 +625,7 @@ orgRows model =
     let
         llcRow =
             if isLLCDonor model then
-                [ memberOwnershipRow model.memberOwnership ]
+                isSingleMemberLLCRows model
 
             else
                 []
@@ -532,7 +658,10 @@ piiRows model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ inputText UpdateEmailAddress "Email Address" model.emailAddress ]
+            [ inputEmail UpdateEmailAddress "Email Address" model.emailAddress ]
+        , Grid.col
+            []
+            [ inputText UpdatePhoneNumber "Phone Number" model.phoneNumber ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
@@ -600,23 +729,126 @@ orgOrIndRow model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ OrgOrInd.view ChooseOrgOrInd model.maybeOrgOrInd ]
+            [ OrgOrInd.row ChooseOrgOrInd model.maybeOrgOrInd ]
         ]
     ]
 
 
-employerRow : Model -> Html Msg
-employerRow model =
+employerOccupationRow : Model -> Html Msg
+employerOccupationRow model =
     Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ inputText UpdateEmployer "Employer" model.employer ]
+            [ inputText UpdateEmployer "Employer Name" model.employer ]
+        , Grid.col
+            []
+            [ inputText UpdateOccupation "Occupation" model.occupation ]
         ]
+
+
+employmentStatusRows : Model -> List (Html Msg)
+employmentStatusRows model =
+    [ Grid.row
+        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Grid.col
+            []
+            [ text "What is your employment status?" ]
+        ]
+    , Grid.row
+        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Grid.col
+            []
+          <|
+            Radio.radioList "employmentStatus"
+                [ SelectRadio.view UpdateEmploymentStatus "employed" "Employed" model.employmentStatus
+                , SelectRadio.view UpdateEmploymentStatus "unemployed" "Unemployed" model.employmentStatus
+                , SelectRadio.view UpdateEmploymentStatus "retired" "Retired" model.employmentStatus
+                , SelectRadio.view UpdateEmploymentStatus "self_employed" "Self Employed" model.employmentStatus
+                ]
+        ]
+    ]
+
+
+isSingleMemberLLCRows : Model -> List (Html Msg)
+isSingleMemberLLCRows model =
+    let
+        currentVal =
+            Maybe.withDefault "" <| Maybe.map boolToString model.maybeIsSingleMemberLLC
+    in
+    [ Grid.row
+        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Grid.col
+            []
+            [ text "Are you the single member of the LLC?" ]
+        ]
+    , Grid.row
+        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Grid.col
+            []
+          <|
+            Radio.radioList "isSingleMemberLLC"
+                [ SelectRadio.view UpdateIsSingleMemberLLC "true" "Yes" currentVal
+                , SelectRadio.view UpdateIsSingleMemberLLC "false" "No" currentVal
+                ]
+        ]
+    ]
+
+
+boolToString : Bool -> String
+boolToString bool =
+    if bool then
+        "true"
+
+    else
+        "false"
+
+
+stringToBool : String -> Bool
+stringToBool str =
+    if str == "true" then
+        True
+
+    else
+        False
+
+
+needEmployerName : String -> Bool
+needEmployerName status =
+    case status of
+        "employed" ->
+            True
+
+        "self_employed" ->
+            True
+
+        _ ->
+            False
+
+
+employmentRows : Model -> List (Html Msg)
+employmentRows model =
+    let
+        employerRowOrEmpty =
+            if needEmployerName model.employmentStatus then
+                [ employerOccupationRow model ]
+
+            else
+                []
+    in
+    employmentStatusRows model ++ employerRowOrEmpty
 
 
 paymentDetailsRows : Model -> List (Html Msg)
 paymentDetailsRows model =
+    let
+        donateButtonOrNot =
+            if model.submitMode == False then
+                [ donateButton model ]
+
+            else
+                []
+    in
     [ Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
@@ -636,7 +868,7 @@ paymentDetailsRows model =
         [ Row.attrs [ Spacing.mt5 ] ]
         [ Grid.col
             []
-            [ submitButton SubmitPaymentInfo "Donate!" False True ]
+            donateButtonOrNot
         ]
     ]
 
@@ -666,6 +898,52 @@ inputText msg placeholder val =
         , Input.onInput msg
         , Input.placeholder placeholder
         ]
+
+
+inputEmail : (String -> Msg) -> String -> String -> Html Msg
+inputEmail msg placeholder val =
+    Input.email
+        [ Input.value val
+        , Input.onInput msg
+        , Input.placeholder placeholder
+        ]
+
+
+attestationRow : Model -> Html Msg
+attestationRow model =
+    Grid.row
+        [ Row.attrs [ Spacing.mt5 ] ]
+        [ Grid.col
+            []
+            [ Checkbox.checkbox
+                [ Checkbox.id "attestation"
+                , Checkbox.checked model.attestation
+                , Checkbox.onCheck UpdateAttestation
+                ]
+                Copy.attestation
+            ]
+        ]
+
+
+sendMessageRows : Model -> List (Html Msg)
+sendMessageRows model =
+    [ Grid.row
+        [ Row.attrs [ Spacing.m3 ] ]
+        [ Grid.col
+            []
+            [ Alert.simpleDark [ Spacing.p3, Spacing.pt4, Spacing.pb4 ] [ text Copy.emailBody ] ]
+        ]
+    , Grid.row
+        [ Row.attrs [ Spacing.m3 ] ]
+        [ Grid.col
+            []
+            [ sendMessageButton model ]
+        ]
+    ]
+
+
+
+-- Validators
 
 
 amountValidator : Validator String Model
@@ -709,7 +987,7 @@ orgInfoValidator model =
     let
         extra =
             if isLLCDonor model then
-                [ memberOwnershipValidator ]
+                [ isSingleMemberLLCValidator ]
 
             else
                 []
@@ -720,6 +998,11 @@ orgInfoValidator model =
 memberOwnershipValidator : Validator String Model
 memberOwnershipValidator =
     ifBlank .memberOwnership "Please specify your percent ownership."
+
+
+isSingleMemberLLCValidator : Validator String Model
+isSingleMemberLLCValidator =
+    ifNothing .maybeIsSingleMemberLLC "Please specify your member status."
 
 
 paymentInfoValidator : Validator String Model
@@ -739,6 +1022,10 @@ scrollUp =
             -- If anything, we'd log this to an error recording service.
             |> Task.onError (\_ -> Task.succeed ())
         )
+
+
+
+-- HTTP API
 
 
 type alias Contribution =

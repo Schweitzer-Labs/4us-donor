@@ -1,4 +1,4 @@
-module OrgOrInd exposing (OrgOrInd(..), view)
+module OrgOrInd exposing (OrgOrInd(..), row)
 
 import Bootstrap.Button as Button
 import Bootstrap.Grid as Grid
@@ -21,19 +21,16 @@ toString orgOrInd =
             "Individual"
 
 
-view : (Maybe OrgOrInd -> msg) -> Maybe OrgOrInd -> Html msg
-view msg currentValue =
-    Grid.containerFluid
+row : (Maybe OrgOrInd -> msg) -> Maybe OrgOrInd -> Html msg
+row msg currentValue =
+    Grid.row
         []
-        [ Grid.row
+        [ Grid.col
             []
-            [ Grid.col
-                []
-                [ selectButton msg (toString Ind) (Just Ind) currentValue ]
-            , Grid.col
-                []
-                [ selectButton msg (toString Org) (Just Org) currentValue ]
-            ]
+            [ selectButton msg (toString Ind) (Just Ind) currentValue ]
+        , Grid.col
+            []
+            [ selectButton msg (toString Org) (Just Org) currentValue ]
         ]
 
 

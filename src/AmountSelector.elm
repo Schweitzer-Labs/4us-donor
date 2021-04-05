@@ -10,11 +10,25 @@ import SelectButton exposing (selectButton)
 import SubmitButton exposing (submitButton)
 
 
-view : (String -> msg) -> String -> msg -> Html msg
-view selectMsg currentVal submitMsg =
+view : (String -> msg) -> String -> msg -> Bool -> Html msg
+view selectMsg currentVal submitMsg buttonVisible =
+    let
+        buttonRow =
+            if buttonVisible then
+                [ Grid.row
+                    [ Row.attrs [ Spacing.mt5 ] ]
+                    [ Grid.col
+                        []
+                        [ submitButton submitMsg "Continue" False True ]
+                    ]
+                ]
+
+            else
+                []
+    in
     Grid.containerFluid
         []
-        [ Grid.row
+        ([ Grid.row
             []
             [ Grid.col
                 [ Col.attrs [ Spacing.pr0 ] ]
@@ -29,7 +43,7 @@ view selectMsg currentVal submitMsg =
                 []
                 [ selectButton selectMsg "$100" "100" currentVal ]
             ]
-        , Grid.row
+         , Grid.row
             []
             [ Grid.col
                 [ Col.attrs [ Spacing.pr0 ] ]
@@ -44,10 +58,6 @@ view selectMsg currentVal submitMsg =
                 []
                 [ div [ Spacing.mt4 ] [ Input.number [ Input.onInput selectMsg ] ] ]
             ]
-        , Grid.row
-            [ Row.attrs [ Spacing.mt5 ] ]
-            [ Grid.col
-                []
-                [ submitButton submitMsg "Continue" False True ]
-            ]
-        ]
+         ]
+            ++ buttonRow
+        )
