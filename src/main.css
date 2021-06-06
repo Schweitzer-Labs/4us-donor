@@ -7208,10 +7208,26 @@ a.text-dark:hover, a.text-dark:focus {
     max-height: 600px; } }
 
 body {
-  background-color: #F4F4F4; }
+  background-image: url("../public/assets/images/lake-placid.jpg");
+  background-size: 100%; }
 
 .w-10 {
   width: 10%; }
 
 .logo-small {
   width: 100px; }
+
+.logo-medium {
+  max-width: 5em; }
+
+.width-200px {
+  width: 200px; }
+
+.bg-form {
+  background-color: #f4f4f4; }
+
+.bg-transparent-white {
+  background-color: rgba(248, 245, 248, 0.9); }
+
+body {
+  min-width: 1200px; }

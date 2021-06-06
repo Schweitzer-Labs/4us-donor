@@ -6,6 +6,9 @@ $grey: #BFBFBF;
 $grey2: #989797;
 $grey3: #AAAAAA;
 
+$transparent-gold: rgba(187,160,99,0.9);
+
+
 $primary: $slate-blue;
 
 $my-warning: #FF5555;
@@ -91,14 +94,9 @@ $theme-colors: (
   }
 }
 
-//.slide-in {
-//  /* This section calls the slideInFromLeft animation we defined above */
-//  animation: 2s ease 0s 1 slideInFromTop;
-//  overflow: hidden;
-//}
-
 body {
-  background-color: #F4F4F4;
+  background-image: url("../public/assets/images/lake-placid.jpg");
+  background-size: 100%;
 }
 
 .w-10 {
@@ -108,3 +106,20 @@ body {
 .logo-small {
   width: 100px;
 }
+
+.logo-medium {
+  max-width: 5em;
+}
+
+.width-200px {
+  width: 200px;
+}
+
+.bg-form {
+  background-color: #f4f4f4;
+}
+
+.bg-transparent-white {
+  background-color: rgba(248, 245, 248, 0.9);
+}
+

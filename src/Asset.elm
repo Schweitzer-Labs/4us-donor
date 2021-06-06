@@ -1,4 +1,4 @@
-module Asset exposing (Glyph(..), Image(..), amalgamatedLogo, bellGlyph, binoculars, blockchainDiamond, calendar, checkCircle, checkCircleSelected, circleCheckGlyph, coinsGlyph, defaultAvatar, documents, eightX, error, finicityCircle, finicityCircleSelected, gearHires, genderNeutral, glyph, house, image, lineSelected, lineUnselected, linkGlyph, loading, minusCircleGlyph, person, plaidCircle, plaidCircleSelected, profileCircle, sackDollarGlyph, search, searchDollarGlyph, src, stripeCircle, stripeCircleSelected, stripeLogo, tbdBankLogo, universityGlyph, usLogo, userGlyph, wiseLogo)
+module Asset exposing (Glyph(..), Image(..), amalgamatedLogo, arthurLogo, bellGlyph, binoculars, blockchainDiamond, calendar, checkCircle, checkCircleSelected, circleCheckGlyph, coinsGlyph, defaultAvatar, documents, eightX, error, finicityCircle, finicityCircleSelected, gearHires, genderNeutral, glyph, house, image, lineSelected, lineUnselected, linkGlyph, loading, minusCircleGlyph, person, plaidCircle, plaidCircleSelected, profileCircle, sackDollarGlyph, search, searchDollarGlyph, src, stripeCircle, stripeCircleSelected, stripeLogo, tbdBankLogo, universityGlyph, usLogo, usLogoWing, userGlyph, wiseLogo)
 
 {-| Assets, such as images, videos, and audio. (We only have images for now.)
 
@@ -37,6 +37,11 @@ wiseLogo =
 usLogo : Image
 usLogo =
     image "logo-hires.png"
+
+
+usLogoWing : Image
+usLogoWing =
+    image "logo-hires-wing.png"
 
 
 blockchainDiamond : Image
@@ -87,6 +92,11 @@ stripeLogo =
 documents : Image
 documents =
     image "documents.png"
+
+
+arthurLogo : Image
+arthurLogo =
+    image "arthur_logo.png"
 
 
 loading : Image

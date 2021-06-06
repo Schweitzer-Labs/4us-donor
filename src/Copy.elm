@@ -22,7 +22,7 @@ currentDonationExceedsLimit remaining =
 
 reachedMaximumContribution : String
 reachedMaximumContribution =
-    "You have reached the maximum contribution limit for our committee. If you'd like to contribute more please contact finance@arthur.4us"
+    "You have reached the maximum contribution limit for our committee. Our team will contact you regarding further contribution methods."
 
 
 arthurEmailAddress : String

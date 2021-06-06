@@ -1,2 +1,1 @@
 npm run build-css && npm install && elm-app build && aws s3 sync build s3://onboarding.4usdemo.com
-

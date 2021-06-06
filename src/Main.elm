@@ -1,17 +1,19 @@
 module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
 
 import AmountSelector
+import AppInput exposing (inputEmail, inputNumber, inputText)
 import Asset
-import Bootstrap.Alert as Alert
 import Bootstrap.Form.Checkbox as Checkbox
 import Bootstrap.Form.Input as Input
 import Bootstrap.Form.Radio as Radio
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
+import Bootstrap.Table as Table
 import Bootstrap.Utilities.Spacing as Spacing
 import Browser exposing (Document)
 import Browser.Dom as Dom
+import CommitteePage
 import ContributorType exposing (ContributorType)
 import Copy
 import Html exposing (..)
@@ -23,10 +25,14 @@ import Json.Decode as Decode
 import Json.Encode as Encode exposing (encode)
 import Mailto
 import OrgOrInd as OrgOrInd exposing (OrgOrInd(..))
+import Owners exposing (Owner, Owners)
 import SelectRadio
 import State
 import SubmitButton exposing (submitButton)
 import Task
+import Url
+import Url.Parser exposing ((<?>), parse, top)
+import Url.Parser.Query as Query exposing (Parser)
 import Validate exposing (Validator, ifBlank, ifInvalidEmail, ifNothing, validate)
 
 
@@ -42,8 +48,11 @@ type alias Model =
     , amountValidated : Bool
     , donorInfoValidated : Bool
     , paymentDetailsValidated : Bool
-    , memberOwnership : String
-    , maybeIsSingleMemberLLC : Maybe Bool
+    , errors : List String
+    , submitMode : Bool
+    , submitting : Bool
+    , submitted : Bool
+    , remaining : Maybe Int
     , emailAddress : String
     , phoneNumber : String
     , firstName : String
@@ -65,54 +74,78 @@ type alias Model =
     , expirationYear : String
     , cvv : String
     , amount : String
-    , errors : List String
-    , submitMode : Bool
-    , submitting : Bool
-    , submitted : Bool
-    , remaining : Maybe Int
+    , owners : Owners
+    , ownerName : String
+    , ownerOwnership : String
+    , ref : String
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
-    ( { committeeId = "fa5bbc12-0d6f-4302-9b2c-5ca0f14fe28b"
-      , donationAmountDisplayState = Open
-      , donorInfoDisplayState = Hidden
-      , paymentDetailsDisplayState = Hidden
-      , amountValidated = False
-      , donorInfoValidated = False
-      , paymentDetailsValidated = False
-      , memberOwnership = ""
-      , maybeIsSingleMemberLLC = Nothing
-      , emailAddress = ""
-      , phoneNumber = ""
-      , firstName = ""
-      , lastName = ""
-      , address1 = ""
-      , address2 = ""
-      , city = ""
-      , state = ""
-      , postalCode = ""
-      , employmentStatus = ""
-      , employer = ""
-      , occupation = ""
-      , entityName = ""
-      , maybeContributorType = Nothing
-      , maybeOrgOrInd = Nothing
-      , attestation = False
-      , cardNumber = ""
-      , expirationMonth = ""
-      , expirationYear = ""
-      , cvv = ""
-      , amount = ""
-      , errors = []
-      , submitMode = False
-      , submitting = False
-      , submitted = False
-      , remaining = Nothing
-      }
-    , Cmd.none
-    )
+committeeIdParser =
+    top <?> Query.string "committeeId"
+
+
+refParser =
+    top <?> Query.string "refCode"
+
+
+init : String -> ( Model, Cmd Msg )
+init urlString =
+    case Url.fromString urlString of
+        Just url ->
+            let
+                committeeId =
+                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse committeeIdParser url
+
+                ref =
+                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse refParser url
+            in
+            ( initModel committeeId ref, Cmd.none )
+
+        Nothing ->
+            ( initModel "" "", Cmd.none )
+
+
+initModel : String -> String -> Model
+initModel committeeId ref =
+    { committeeId = committeeId
+    , donationAmountDisplayState = Open
+    , donorInfoDisplayState = Hidden
+    , paymentDetailsDisplayState = Hidden
+    , amountValidated = False
+    , donorInfoValidated = False
+    , paymentDetailsValidated = False
+    , attestation = False
+    , errors = []
+    , emailAddress = ""
+    , phoneNumber = ""
+    , firstName = ""
+    , lastName = ""
+    , address1 = ""
+    , address2 = ""
+    , city = ""
+    , state = ""
+    , postalCode = ""
+    , employmentStatus = ""
+    , employer = ""
+    , occupation = ""
+    , entityName = ""
+    , maybeContributorType = Nothing
+    , maybeOrgOrInd = Nothing
+    , cardNumber = ""
+    , expirationMonth = ""
+    , expirationYear = ""
+    , cvv = ""
+    , amount = ""
+    , submitMode = False
+    , submitting = False
+    , submitted = False
+    , remaining = Nothing
+    , owners = []
+    , ownerName = ""
+    , ownerOwnership = ""
+    , ref = ref
+    }
 
 
 type DisplayState
@@ -123,10 +156,15 @@ type DisplayState
 
 view : Model -> Html Msg
 view model =
+    CommitteePage.view (stateView model)
+
+
+stateView : Model -> Html Msg
+stateView model =
     if model.submitted then
         div [ class "text-center text-success display-4", Spacing.mt5 ]
             [ h3 [] [ text "Thank you for contributing!" ]
-            , logoDiv
+            , logoWingDiv
             ]
 
     else
@@ -143,7 +181,7 @@ view model =
                         []
         in
         div
-            []
+            [ class "bg-form", Spacing.pb5 ]
             ([ donationAmountView model
              , provideDonorInfoView model
              , providePaymentDetailsView model
@@ -156,6 +194,11 @@ view model =
 logoDiv : Html Msg
 logoDiv =
     div [ class "text-center" ] [ img [ Asset.src Asset.usLogo, class "logo-small", Spacing.mt4 ] [] ]
+
+
+logoWingDiv : Html Msg
+logoWingDiv =
+    div [ class "text-center" ] [ img [ Asset.src Asset.usLogoWing, class "logo-medium", Spacing.mt4 ] [] ]
 
 
 frameContainer : DisplayState -> Html Msg -> List String -> Html Msg -> Msg -> Html Msg
@@ -310,13 +353,14 @@ providePaymentDetailsView model =
         model.errors
         (Grid.containerFluid
             []
-            (paymentDetailsRows model)
+            (paymentMethodRows ++ paymentDetailsRows model)
         )
         OpenPaymentDetails
 
 
 type Msg
     = AmountUpdated String
+      -- Donor info
     | ChooseOrgOrInd (Maybe OrgOrInd)
     | UpdateEmailAddress String
     | UpdatePhoneNumber String
@@ -332,10 +376,11 @@ type Msg
     | UpdateOccupation String
     | UpdateOrganizationName String
     | UpdateOrganizationClassification (Maybe ContributorType)
-    | UpdateIsSingleMemberLLC String
-    | UpdateMemberOwnership String
     | UpdateFamilyOrIndividual ContributorType
-    | UpdateAttestation Bool
+    | AddOwner
+    | UpdateOwnerName String
+    | UpdateOwnerOwnership String
+      -- Payment info
     | UpdateCardNumber String
     | UpdateExpirationMonth String
     | UpdateExpirationYear String
@@ -347,8 +392,11 @@ type Msg
     | OpenDonationAmount
     | OpenDonorInfo
     | OpenPaymentDetails
+    | UpdateOwner Owner
+    | UpdateAttestation Bool
     | GotAPIResponseContribute (Result (Http.Detailed.Error String) ( Http.Metadata, String ))
     | NoOp
+    | UpdatePaymentMethod String
 
 
 type FormView
@@ -369,10 +417,10 @@ toggleDisplayState model formView =
     in
     case formView of
         DonationAmount ->
-            { model | donationAmountDisplayState = Open, donorInfoDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, submitMode = False, errors = [] }
+            { model | donationAmountDisplayState = Open, donorInfoDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, submitMode = False, remaining = Nothing, errors = [] }
 
         DonorInfo ->
-            { model | donorInfoDisplayState = Open, donationAmountDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, submitMode = False, errors = [] }
+            { model | donorInfoDisplayState = Open, donationAmountDisplayState = Closed, paymentDetailsDisplayState = paymentDetailsToggled, submitMode = False, remaining = Nothing, errors = [] }
 
         PaymentDetails ->
             { model | paymentDetailsDisplayState = Open, donationAmountDisplayState = Closed, donorInfoDisplayState = Closed, submitMode = False, errors = [] }
@@ -444,11 +492,28 @@ update msg model =
         UpdateOrganizationClassification maybeContributorType ->
             ( { model | maybeContributorType = maybeContributorType, submitMode = False }, Cmd.none )
 
-        UpdateMemberOwnership str ->
-            ( { model | memberOwnership = str }, Cmd.none )
+        UpdateOwner newOwner ->
+            let
+                withoutOwner =
+                    List.filter (\{ name } -> name /= newOwner.name) model.owners
 
-        UpdateIsSingleMemberLLC str ->
-            ( { model | maybeIsSingleMemberLLC = Just (stringToBool str) }, Cmd.none )
+                withNewOwner =
+                    withoutOwner ++ [ newOwner ]
+            in
+            ( { model | owners = withNewOwner }, Cmd.none )
+
+        AddOwner ->
+            let
+                newOwner =
+                    Owner model.ownerName model.ownerOwnership
+            in
+            ( { model | owners = model.owners ++ [ newOwner ], ownerOwnership = "", ownerName = "" }, Cmd.none )
+
+        UpdateOwnerName str ->
+            ( { model | ownerName = str }, Cmd.none )
+
+        UpdateOwnerOwnership str ->
+            ( { model | ownerOwnership = str }, Cmd.none )
 
         UpdatePhoneNumber str ->
             ( { model | phoneNumber = str }, Cmd.none )
@@ -491,6 +556,9 @@ update msg model =
 
         UpdateAttestation bool ->
             ( { model | attestation = bool }, Cmd.none )
+
+        UpdatePaymentMethod str ->
+            ( model, Cmd.none )
 
         UpdateCardNumber str ->
             ( { model | cardNumber = str }, Cmd.none )
@@ -573,7 +641,7 @@ update msg model =
             ( model, Cmd.none )
 
 
-main : Program () Model Msg
+main : Program String Model Msg
 main =
     Browser.element
         { init = init
@@ -609,15 +677,71 @@ isLLCDonor model =
     Maybe.withDefault False (Maybe.map ContributorType.isLLC model.maybeContributorType)
 
 
-memberOwnershipRow : String -> Html Msg
-memberOwnershipRow val =
-    Grid.row
-        []
+
+-- @Todo Add validation for percentage total
+-- @Todo Add ability to edit owners
+
+
+manageOwnerRows : Model -> List (Html Msg)
+manageOwnerRows model =
+    let
+        tableBody =
+            Table.tbody [] <|
+                List.map
+                    (\owner ->
+                        Table.tr []
+                            [ Table.td [] [ text owner.name ]
+                            , Table.td [] [ text owner.percentOwnership ]
+                            ]
+                    )
+                    model.owners
+
+        tableHead =
+            Table.simpleThead
+                [ Table.th [] [ text "Name" ]
+                , Table.th [] [ text "Percent Ownership" ]
+                ]
+
+        capTable =
+            if List.length model.owners > 0 then
+                [ Table.simpleTable ( tableHead, tableBody ) ]
+
+            else
+                []
+    in
+    [ Grid.row
+        [ Row.attrs [ Spacing.mt3, Spacing.mb3 ] ]
         [ Grid.col
-            [ Col.xs6, Col.attrs [ Spacing.mt3 ] ]
-            [ Input.number [ Input.onInput UpdateMemberOwnership, Input.value val, Input.placeholder "Percent Ownership" ]
+            []
+            [ text "Please specify the current ownership breakdown of your company."
             ]
         ]
+    , Grid.row
+        [ Row.attrs [ Spacing.mb3 ] ]
+        [ Grid.col
+            []
+            [ text "*Total percent ownership must equal 100%"
+            ]
+        ]
+    ]
+        ++ capTable
+        ++ [ Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    []
+                    [ inputText UpdateOwnerName "Owner Name" model.ownerName
+                    ]
+                , Grid.col
+                    []
+                    [ inputText UpdateOwnerOwnership "Percent Ownership" model.ownerOwnership ]
+                ]
+           , Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    [ Col.xs6, Col.offsetXs6 ]
+                    [ submitButton AddOwner "Add another member" False True ]
+                ]
+           ]
 
 
 orgRows : Model -> List (Html Msg)
@@ -625,7 +749,7 @@ orgRows model =
     let
         llcRow =
             if isLLCDonor model then
-                isSingleMemberLLCRows model
+                manageOwnerRows model
 
             else
                 []
@@ -705,7 +829,9 @@ familyRow model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ text "Are you a family member of the candidate that will receive this contribution?" ]
+            [ div [] [ text "Are you a family member* of the candidate who will receive this contribution?" ]
+            , div [ Spacing.pl3, Spacing.pr3, Spacing.pt1 ] [ text "*Defined as the candidate's child, parent, grandparent, brother, sister, and the spouses of any such persons" ]
+            ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
@@ -770,31 +896,6 @@ employmentStatusRows model =
     ]
 
 
-isSingleMemberLLCRows : Model -> List (Html Msg)
-isSingleMemberLLCRows model =
-    let
-        currentVal =
-            Maybe.withDefault "" <| Maybe.map boolToString model.maybeIsSingleMemberLLC
-    in
-    [ Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
-        [ Grid.col
-            []
-            [ text "Are you the single member of the LLC?" ]
-        ]
-    , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
-        [ Grid.col
-            []
-          <|
-            Radio.radioList "isSingleMemberLLC"
-                [ SelectRadio.view UpdateIsSingleMemberLLC "true" "Yes" currentVal
-                , SelectRadio.view UpdateIsSingleMemberLLC "false" "No" currentVal
-                ]
-        ]
-    ]
-
-
 boolToString : Bool -> String
 boolToString bool =
     if bool then
@@ -852,16 +953,16 @@ paymentDetailsRows model =
     [ Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
-            [ Col.sm6, Col.attrs [ Spacing.p2 ] ]
+            [ Col.sm6 ]
             [ inputText UpdateCardNumber "Card Number" model.cardNumber ]
         , Grid.col
-            [ Col.attrs [ Spacing.p2 ] ]
+            []
             [ inputNumber UpdateExpirationMonth "MM" model.expirationMonth ]
         , Grid.col
-            [ Col.attrs [ Spacing.p2 ] ]
+            []
             [ inputNumber UpdateExpirationYear "YYYY" model.expirationYear ]
         , Grid.col
-            [ Col.attrs [ Spacing.p2 ] ]
+            []
             [ inputText UpdateCVV "CVV" model.cvv ]
         ]
     , Grid.row
@@ -871,42 +972,6 @@ paymentDetailsRows model =
             donateButtonOrNot
         ]
     ]
-
-
-inputNumber : (String -> Msg) -> String -> String -> Html Msg
-inputNumber msg placeholder val =
-    Input.text
-        [ Input.value val
-        , Input.onInput msg
-        , Input.placeholder placeholder
-        ]
-
-
-inputMonth : (String -> Msg) -> String -> String -> Html Msg
-inputMonth msg placeholder val =
-    Input.month
-        [ Input.value val
-        , Input.onInput msg
-        , Input.placeholder placeholder
-        ]
-
-
-inputText : (String -> Msg) -> String -> String -> Html Msg
-inputText msg placeholder val =
-    Input.text
-        [ Input.value val
-        , Input.onInput msg
-        , Input.placeholder placeholder
-        ]
-
-
-inputEmail : (String -> Msg) -> String -> String -> Html Msg
-inputEmail msg placeholder val =
-    Input.email
-        [ Input.value val
-        , Input.onInput msg
-        , Input.placeholder placeholder
-        ]
 
 
 attestationRow : Model -> Html Msg
@@ -931,13 +996,7 @@ sendMessageRows model =
         [ Row.attrs [ Spacing.m3 ] ]
         [ Grid.col
             []
-            [ Alert.simpleDark [ Spacing.p3, Spacing.pt4, Spacing.pb4 ] [ text Copy.emailBody ] ]
-        ]
-    , Grid.row
-        [ Row.attrs [ Spacing.m3 ] ]
-        [ Grid.col
-            []
-            [ sendMessageButton model ]
+            [ div [ Spacing.p3, Spacing.pt4, Spacing.pb4, class "text-danger" ] [ text Copy.reachedMaximumContribution ] ]
         ]
     ]
 
@@ -987,22 +1046,12 @@ orgInfoValidator model =
     let
         extra =
             if isLLCDonor model then
-                [ isSingleMemberLLCValidator ]
+                []
 
             else
                 []
     in
     Validate.firstError ([ organizationValidator, piiValidator ] ++ extra)
-
-
-memberOwnershipValidator : Validator String Model
-memberOwnershipValidator =
-    ifBlank .memberOwnership "Please specify your percent ownership."
-
-
-isSingleMemberLLCValidator : Validator String Model
-isSingleMemberLLCValidator =
-    ifNothing .maybeIsSingleMemberLLC "Please specify your member status."
 
 
 paymentInfoValidator : Validator String Model
@@ -1067,12 +1116,13 @@ encodeContribution model =
         , ( "state", Encode.string model.state )
         , ( "postalCode", Encode.string model.postalCode )
         , ( "amount", Encode.int <| dollarStringToCents model.amount )
-        , ( "creditCardNumber", Encode.string model.cardNumber )
+        , ( "creditCardNumber", Encode.string "4242424242424242" )
         , ( "expirationMonth", Encode.int <| numberStringToInt model.expirationMonth )
         , ( "expirationYear", Encode.int <| numberStringToInt model.expirationYear )
         , ( "paymentMethod", Encode.string "credit" )
         , ( "contributorType", Encode.string <| ContributorType.toDataString <| Maybe.withDefault ContributorType.llc model.maybeContributorType )
         , ( "companyName", Encode.string model.entityName )
+        , ( "refCode", Encode.string model.ref )
         ]
 
 
@@ -1094,3 +1144,24 @@ postContribution model =
         , expect =
             Http.Detailed.expectString GotAPIResponseContribute
         }
+
+
+paymentMethodRows : List (Html Msg)
+paymentMethodRows =
+    let
+        currentValue =
+            "credit"
+    in
+    [ Grid.row
+        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Grid.col
+            []
+          <|
+            Radio.radioList
+                ""
+                [ SelectRadio.view UpdatePaymentMethod "credit" "Credit/Debit" currentValue
+                , SelectRadio.view UpdatePaymentMethod "" "eCheck" currentValue
+                , SelectRadio.view UpdatePaymentMethod "" "Crypto" currentValue
+                ]
+        ]
+    ]

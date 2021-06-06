@@ -8,7 +8,7 @@ import Html exposing (Html, text)
 submitButton : msg -> String -> Bool -> Bool -> Html msg
 submitButton msg buttonText loading enabled =
     Button.button
-        [ Button.primary
+        [ Button.success
         , Button.block
         , Button.onClick msg
         , Button.disabled (enabled == False)
