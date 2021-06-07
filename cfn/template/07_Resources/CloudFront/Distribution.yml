@@ -40,7 +40,7 @@ Distribution:
         ViewerProtocolPolicy: redirect-to-https
         FunctionAssociations:
           - EventType: viewer-request
-            FunctionARN: !GetAtt DirectoryIndexFunction.FunctionMetadata.FunctionARN
+            FunctionARN: !Ref DirectoryIndexFunction
           - EventType: viewer-response
             FunctionARN: !GetAtt SecureHeadersFunction.FunctionMetadata.FunctionARN
       CacheBehaviors:
