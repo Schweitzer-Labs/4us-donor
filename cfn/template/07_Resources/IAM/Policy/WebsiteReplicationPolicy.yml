@@ -1,0 +1,36 @@
+WebsiteReplicationPolicy:
+  Type: AWS::IAM::Policy
+  Condition: Production
+  Description: Replication Policy for {{ site | lower }}
+  Properties:
+    PolicyName: WebsiteReplicationPolicy
+{% if RUNENV == 'prod' %}
+    Roles:
+      - !Ref WebsiteReplicationRoleName
+{% endif %}
+    PolicyDocument:
+      Statement:
+        - Effect: Allow
+          Resource: !GetAtt WebsiteBucket.Arn
+          Action:
+            - s3:GetReplicationConfiguration
+            - s3:ListBucket
+        - Effect: Allow
+          Resource: 
+            !Join
+              - '/'
+              - - !GetAtt WebsiteBucket.Arn
+                - '*'
+          Action:
+            - s3:GetObjectVersion
+            - s3:GetObjectVersionAcl
+        - Effect: Allow
+          Resource: 
+            !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref WebsiteBucket
+                - !Sub -${AWS::Region}/*
+          Action:
+            - s3:ReplicateObject
+            - s3:ReplicateDelete
