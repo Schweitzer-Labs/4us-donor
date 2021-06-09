@@ -5720,7 +5720,7 @@ button.bg-dark:focus {
 .p-1 {
   padding: 0.25rem !important; }
 
-.pt-1,
+.pt-1, .btn,
 .py-1 {
   padding-top: 0.25rem !important; }
 
@@ -5728,7 +5728,7 @@ button.bg-dark:focus {
 .px-1 {
   padding-right: 0.25rem !important; }
 
-.pb-1,
+.pb-1, .btn,
 .py-1 {
   padding-bottom: 0.25rem !important; }
 
@@ -5777,7 +5777,9 @@ button.bg-dark:focus {
 .p-4 {
   padding: 1.5rem !important; }
 
-.pt-4,
+.pt-4, .form-control[type="text"],
+.form-control[type="email"],
+.form-control[type="password"],
 .py-4 {
   padding-top: 1.5rem !important; }
 
@@ -5785,7 +5787,9 @@ button.bg-dark:focus {
 .px-4 {
   padding-right: 1.5rem !important; }
 
-.pb-4,
+.pb-4, .form-control[type="text"],
+.form-control[type="email"],
+.form-control[type="password"],
 .py-4 {
   padding-bottom: 1.5rem !important; }
 
@@ -7238,3 +7242,7 @@ a.text-dark:hover, a.text-dark:focus {
 body {
   max-width: 1224px;
   margin: 0 auto; }
+
+.bigger-than-h1 {
+  font-weight: bold;
+  font-size: 3.0rem; }

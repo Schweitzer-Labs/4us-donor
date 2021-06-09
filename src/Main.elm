@@ -1,7 +1,7 @@
 module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
 
 import AmountSelector
-import AppInput exposing (inputEmail, inputNumber, inputText)
+import AppInput exposing (inputEmail, inputNumber, inputSecure, inputText, inputToggleSecure)
 import Asset
 import Bootstrap.Form.Checkbox as Checkbox
 import Bootstrap.Form.Input as Input
@@ -79,6 +79,7 @@ type alias Model =
     , ownerName : String
     , ownerOwnership : String
     , ref : String
+    , cardNumberIsVisible : Bool
     }
 
 
@@ -153,6 +154,7 @@ initModel endpoint committeeId ref =
     , ownerName = ""
     , ownerOwnership = ""
     , ref = ref
+    , cardNumberIsVisible = False
     }
 
 
@@ -308,7 +310,7 @@ donorInfoTitle model =
                 fullName =
                     model.firstName ++ " " ++ model.lastName
             in
-            if String.length fullName > 0 then
+            if String.length fullName > 1 then
                 titleWithData "Donor Info" fullName
 
             else
@@ -405,6 +407,7 @@ type Msg
     | GotAPIResponseContribute (Result (Http.Detailed.Error String) ( Http.Metadata, String ))
     | NoOp
     | UpdatePaymentMethod String
+    | ToggleCardNumberVisibility Bool
 
 
 type FormView
@@ -644,6 +647,9 @@ update msg model =
 
                         _ ->
                             ( { model | errors = [ Copy.genericError ], submitting = False }, Cmd.none )
+
+        ToggleCardNumberVisibility bool ->
+            ( { model | cardNumberIsVisible = bool }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -961,17 +967,26 @@ paymentDetailsRows model =
     [ Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
-            [ Col.sm6 ]
-            [ inputText UpdateCardNumber "Card Number" model.cardNumber ]
-        , Grid.col
             []
-            [ inputNumber UpdateExpirationMonth "MM" model.expirationMonth ]
+            [ inputToggleSecure
+                UpdateCardNumber
+                "Card Number*"
+                model.cardNumber
+                model.cardNumberIsVisible
+                ToggleCardNumberVisibility
+            ]
+        ]
+    , Grid.row
+        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Grid.col
+            [ Col.xs4 ]
+            [ inputNumber UpdateExpirationMonth "MM*" model.expirationMonth ]
         , Grid.col
-            []
-            [ inputNumber UpdateExpirationYear "YYYY" model.expirationYear ]
+            [ Col.xs4 ]
+            [ inputNumber UpdateExpirationYear "YYYY*" model.expirationYear ]
         , Grid.col
-            []
-            [ inputText UpdateCVV "CVV" model.cvv ]
+            [ Col.xs4 ]
+            [ inputSecure UpdateCVV "CVV*" model.cvv ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt5 ] ]

@@ -134,3 +134,20 @@ body {
   max-width: 1224px;
   margin: 0 auto;
 }
+
+.bigger-than-h1 {
+  font-weight: bold;
+  font-size: 3.0rem;
+}
+
+.form-control[type="text"],
+.form-control[type="email"],
+.form-control[type="password"] {
+  @extend .pt-4;
+  @extend .pb-4;
+}
+
+.btn {
+  @extend .pt-1;
+  @extend .pb-1;
+}

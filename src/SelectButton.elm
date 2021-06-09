@@ -22,7 +22,7 @@ selectButton msg displayText value currentVal =
     Button.button
         [ color
         , Button.block
-        , Button.attrs [ Spacing.mt4, Spacing.p2, class "font-weight-bold border-round" ]
+        , Button.attrs [ Spacing.mt4, Spacing.p2, class "font-weight-bold" ]
         , Button.onClick (msg value)
         ]
         [ text <| displayText ]
