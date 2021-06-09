@@ -1,8 +1,16 @@
 import './main.css';
 import * as serviceWorker from './serviceWorker';
-import * as ElmApp from "./js/elm-app"
+import {Elm} from "./Main.elm";
+import {elmAppId} from "./js/config";
 
+const apiEndpoint = process.env.ELM_APP_API_ENDPOINT
 
-ElmApp.mount()
+Elm.Main.init({
+  node: document.getElementById(elmAppId),
+  flags: {
+    host: window.location.href,
+    apiEndpoint
+  }
+});
 
 serviceWorker.unregister();

@@ -41,7 +41,8 @@ import Validate exposing (Validator, ifBlank, ifInvalidEmail, ifNothing, validat
 
 
 type alias Model =
-    { committeeId : String
+    { endpoint : String
+    , committeeId : String
     , donationAmountDisplayState : DisplayState
     , donorInfoDisplayState : DisplayState
     , paymentDetailsDisplayState : DisplayState
@@ -89,9 +90,15 @@ refParser =
     top <?> Query.string "refCode"
 
 
-init : String -> ( Model, Cmd Msg )
-init urlString =
-    case Url.fromString urlString of
+type alias Config =
+    { host : String
+    , apiEndpoint : String
+    }
+
+
+init : Config -> ( Model, Cmd Msg )
+init { host, apiEndpoint } =
+    case Url.fromString host of
         Just url ->
             let
                 committeeId =
@@ -100,15 +107,16 @@ init urlString =
                 ref =
                     Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse refParser url
             in
-            ( initModel committeeId ref, Cmd.none )
+            ( initModel apiEndpoint committeeId ref, Cmd.none )
 
         Nothing ->
-            ( initModel "" "", Cmd.none )
+            ( initModel apiEndpoint "" "", Cmd.none )
 
 
-initModel : String -> String -> Model
-initModel committeeId ref =
-    { committeeId = committeeId
+initModel : String -> String -> String -> Model
+initModel endpoint committeeId ref =
+    { endpoint = endpoint
+    , committeeId = committeeId
     , donationAmountDisplayState = Open
     , donorInfoDisplayState = Hidden
     , paymentDetailsDisplayState = Hidden
@@ -353,7 +361,7 @@ providePaymentDetailsView model =
         model.errors
         (Grid.containerFluid
             []
-            (paymentMethodRows ++ paymentDetailsRows model)
+            (paymentDetailsRows model)
         )
         OpenPaymentDetails
 
@@ -480,7 +488,7 @@ update msg model =
                         , donorInfoDisplayState = Closed
                         , paymentDetailsDisplayState = Open
                       }
-                    , Cmd.none
+                    , scrollUp
                     )
 
         ChooseOrgOrInd maybeOrgOrInd ->
@@ -641,7 +649,7 @@ update msg model =
             ( model, Cmd.none )
 
 
-main : Program String Model Msg
+main : Program Config Model Msg
 main =
     Browser.element
         { init = init

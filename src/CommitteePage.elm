@@ -3,35 +3,30 @@ module CommitteePage exposing (view)
 import Asset
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
-import Bootstrap.Text as Text
+import Bootstrap.Grid.Row as Row
 import Bootstrap.Utilities.Spacing as Spacing
-import Html exposing (Html, div, h1, h4, img, text)
-import Html.Attributes exposing (class, href)
+import Copy
+import Html exposing (Html, div, h1, h2, h4, h5, img, p, text)
+import Html.Attributes exposing (class, href, src)
 
 
 view : Html msg -> Html msg
 view form =
     div
-        []
-        [ div [ class "text-center" ] [ img [ Asset.src Asset.arthurLogo, class "width-200px" ] [] ]
+        [ Spacing.pl2Md, Spacing.pr2Md ]
+        [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ text Copy.promoHeading ] ]
         , Grid.containerFluid
             []
             [ Grid.row
-                []
+                [ Row.attrs [ Spacing.ml5Md, Spacing.mr5Md, Spacing.mb5 ] ]
                 [ Grid.col
-                    [ Col.xs6, Col.attrs [ Spacing.p5 ] ]
-                    [ h4 [ class "bg-transparent-white text-black", Spacing.p4 ] [ text promoCopy ] ]
+                    [ Col.md6, Col.attrs [], Col.orderXs2, Col.orderMd1 ]
+                    [ p [ class "text-black" ] [ Copy.promoContent ]
+                    , div [] [ img [ Asset.src Asset.johnSaffordHeadShot, class "w-100" ] [] ]
+                    ]
                 , Grid.col
-                    [ Col.xs6, Col.attrs [ Spacing.p5 ] ]
+                    [ Col.md6, Col.attrs [], Col.orderXs1, Col.orderMd2 ]
                     [ form ]
                 ]
             ]
         ]
-
-
-promoCopy : String
-promoCopy =
-    """
-If there's one thing the people of Essex County can agree on, it's that a little bit can go a long way.
-Please join Arthur by contributing even the smallest amount you can.
-"""

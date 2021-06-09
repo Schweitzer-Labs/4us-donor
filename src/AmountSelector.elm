@@ -1,6 +1,5 @@
 module AmountSelector exposing (view)
 
-import Bootstrap.Form.Checkbox as Checkbox
 import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
@@ -60,32 +59,5 @@ view selectMsg currentVal submitMsg buttonVisible =
                 [ div [ Spacing.mt4 ] [ Input.number [ Input.onInput selectMsg ] ] ]
             ]
          ]
-            ++ [ recurringRow ]
-            ++ [ extraCopyRow ]
             ++ buttonRow
         )
-
-
-recurringRow : Html msg
-recurringRow =
-    Grid.row
-        [ Row.attrs [ Spacing.mt5 ] ]
-        [ Grid.col
-            []
-            [ Checkbox.checkbox
-                [ Checkbox.id "recurring"
-                ]
-                "Make this contribution recur monthly. "
-            ]
-        ]
-
-
-extraCopyRow : Html msg
-extraCopyRow =
-    Grid.row
-        [ Row.attrs [ Spacing.ml1 ] ]
-        [ Grid.col
-            []
-            [ text "(Note: Contribution limits will not be exceeded)"
-            ]
-        ]
