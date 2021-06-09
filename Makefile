@@ -82,7 +82,6 @@ build-web: build
 		--runenv=$(RUNENV) \
 		--subdomain=$(SUBDOMAIN)-$(RUNENV) --domain=$(DOMAIN) --tld=$(TLD) \
 		run build
-		#--committee=$(COMMITTEE) \
 
 deploy-web: build-web
 	aws s3 sync build/ s3://$(WEB_BUCKET)/
