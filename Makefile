@@ -1,14 +1,12 @@
 SHELL			:= bash
 export CREPES		:= $(PWD)/cfn/bin/crepes.py
 export SUBDOMAIN	:= donate
+export PRODUCT		:= 4us
 
 ifeq ($(RUNENV), )
        export RUNENV	:= qa
 endif
 
-ifeq ($(PRODUCT), )
-	export PRODUCT	:= 4us
-endif
 
 # Deduce the Domain related parameters based on the RUNENV and PRODUCT params
 ifeq ($(RUNENV), qa)
@@ -23,9 +21,7 @@ else ifeq ($(RUNENV), demo)
         export REGION   := us-west-1
 	export DOMAIN   := 4usdemo
 	export TLD      := com
-	export PRODUCT	:= 4us
 endif
-
 
 export STACK		:= $(RUNENV)-$(PRODUCT)-$(SUBDOMAIN)
 
@@ -80,16 +76,16 @@ check: build
 build-committees: $(COMMITTEE_SRCS)
 
 build-web: build
-	@npm -C $(COMMITTEE_DIR) install
-	#npm -C $(COMMITTEE_DIR) run build-css
-	@npm -C $(COMMITTEE_DIR) \
-		--committee=$(COMMITTEE) \
+	@npm install
+	#npm run build-css
+	@npm \
 		--runenv=$(RUNENV) \
 		--subdomain=$(SUBDOMAIN)-$(RUNENV) --domain=$(DOMAIN) --tld=$(TLD) \
 		run build
+		#--committee=$(COMMITTEE) \
 
 deploy-web: build-web
-	aws s3 sync $(COMMITTEE_DIR)/build/ s3://$(WEB_BUCKET)/$(COMMITTEE)
+	aws s3 sync build/ s3://$(WEB_BUCKET)/
 
 clean:
 	@rm -f $(BUILD_DIR)/*.yml
