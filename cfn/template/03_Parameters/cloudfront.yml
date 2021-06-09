@@ -1,6 +1,10 @@
 CloudFrontCertificate:
   Type: AWS::SSM::Parameter::Value<String>
+{% if RUNENV == 'prod' and PRODUCT == '4us' %}
+  Default: /{{ RUNENV }}/{{ PRODUCT }}/acm/certificate
+{% else %}
   Default: /{{ RUNENV }}/{{ PRODUCT }}/acm/certificate/cloudfront/us-east-1
+{% endif %}
 CachePolicyS3:
   Type: AWS::SSM::Parameter::Value<String>
   Default: /{{ REGION }}/cloudfront/cachepolicy/s3
