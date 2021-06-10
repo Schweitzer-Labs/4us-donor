@@ -25,79 +25,79 @@ toDataString : ContributorType -> String
 toDataString contributorType =
     case contributorType of
         Family ->
-            "fam"
+            "Fam"
 
         Individual ->
-            "ind"
+            "Ind"
 
         SoleProprietorship ->
-            "solep"
+            "Solep"
 
         PartnershipIncludingLLPs ->
-            "part"
+            "Part"
 
         Corporation ->
-            "corp"
+            "Corp"
 
         Committee ->
-            "comm"
+            "Comm"
 
         Union ->
-            "union"
+            "Union"
 
         Association ->
-            "assoc"
+            "Assoc"
 
         LimitedLiabilityCompany ->
-            "llc"
+            "Llc"
 
         PoliticalActionCommittee ->
-            "pac"
+            "Pac"
 
         PoliticalCommittee ->
-            "plc"
+            "Plc"
 
         Other ->
-            "oth"
+            "Oth"
 
 
 fromString : String -> Maybe ContributorType
 fromString str =
     case str of
-        "fam" ->
+        "Fam" ->
             Just Family
 
-        "ind" ->
+        "Ind" ->
             Just Individual
 
-        "solep" ->
+        "Solep" ->
             Just SoleProprietorship
 
-        "part" ->
+        "Part" ->
             Just PartnershipIncludingLLPs
 
-        "corp" ->
+        "Corp" ->
             Just Corporation
 
-        "comm" ->
+        "Comm" ->
             Just Committee
 
-        "union" ->
+        "Union" ->
             Just Union
 
-        "assoc" ->
+        "Assoc" ->
             Just Association
 
-        "llc" ->
+        "Llc" ->
             Just LimitedLiabilityCompany
 
-        "pac" ->
+        "Pac" ->
             Just PoliticalActionCommittee
 
-        "plc" ->
+        "Plc" ->
             Just PoliticalCommittee
 
-        "oth" ->
+        "Oth" ->
             Just Other
 
         _ ->

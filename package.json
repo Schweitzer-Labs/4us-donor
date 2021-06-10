@@ -10,8 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
-    "start": "ELM_APP_API_ENDPOINT=http://localhost:8080/proxy elm-app start",
-    "build": "ELM_APP_API_ENDPOINT=https://$npm_config_subdomain.$npm_config_domain.$npm_config_tld/api elm-app build"
+    "proxy-qa": "lcp --proxyUrl https://donor.build4.us/api/platform/contribute",
+    "start": "ELM_APP_API_ENDPOINT=http://localhost:8010/proxy elm-app start",
+    "build": "ELM_APP_API_ENDPOINT=https://$npm_config_subdomain.$npm_config_domain.$npm_config_tld/api/platform/contribute elm-app build"
   },
   "author": "",
   "license": "ISC",

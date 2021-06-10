@@ -16,13 +16,14 @@ import Browser.Dom as Dom
 import CommitteePage
 import ContributorType exposing (ContributorType)
 import Copy
+import EmploymentStatus exposing (EmploymentStatus)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
 import Json.Decode as Decode
-import Json.Encode as Encode exposing (encode)
+import Json.Encode as Encode exposing (Value, encode)
 import Mailto
 import OrgOrInd as OrgOrInd exposing (OrgOrInd(..))
 import Owners exposing (Owner, Owners)
@@ -63,7 +64,7 @@ type alias Model =
     , city : String
     , state : String
     , postalCode : String
-    , employmentStatus : String
+    , employmentStatus : Maybe EmploymentStatus
     , employer : String
     , occupation : String
     , entityName : String
@@ -135,7 +136,6 @@ initModel endpoint committeeId ref =
     , city = ""
     , state = ""
     , postalCode = ""
-    , employmentStatus = ""
     , employer = ""
     , occupation = ""
     , entityName = ""
@@ -155,6 +155,7 @@ initModel endpoint committeeId ref =
     , ownerOwnership = ""
     , ref = ref
     , cardNumberIsVisible = False
+    , employmentStatus = Nothing
     }
 
 
@@ -166,7 +167,7 @@ type DisplayState
 
 view : Model -> Html Msg
 view model =
-    CommitteePage.view (stateView model)
+    CommitteePage.view model.committeeId (stateView model)
 
 
 stateView : Model -> Html Msg
@@ -352,7 +353,7 @@ providePaymentDetailsView model =
     let
         title =
             if model.paymentDetailsValidated then
-                titleWithData "Payment Details" "Credit"
+                titleWithData "Payment Details" "Debit/Credit"
 
             else
                 text "Payment Details"
@@ -381,7 +382,7 @@ type Msg
     | UpdateCity String
     | UpdateState String
     | UpdatePostalCode String
-    | UpdateEmploymentStatus String
+    | UpdateEmploymentStatus EmploymentStatus
     | UpdateEmployer String
     | UpdateOccupation String
     | UpdateOrganizationName String
@@ -495,13 +496,22 @@ update msg model =
                     )
 
         ChooseOrgOrInd maybeOrgOrInd ->
-            ( { model | maybeOrgOrInd = maybeOrgOrInd, maybeContributorType = Nothing, errors = [], submitMode = False }, Cmd.none )
+            let
+                employmentStatus =
+                    case maybeOrgOrInd of
+                        Just OrgOrInd.Org ->
+                            Just EmploymentStatus.Employed
+
+                        _ ->
+                            model.employmentStatus
+            in
+            ( { model | maybeOrgOrInd = maybeOrgOrInd, maybeContributorType = Nothing, employmentStatus = employmentStatus, errors = [], submitMode = False }, Cmd.none )
 
         UpdateOrganizationName entityName ->
             ( { model | entityName = entityName, submitMode = False }, Cmd.none )
 
-        UpdateOrganizationClassification maybeContributorType ->
-            ( { model | maybeContributorType = maybeContributorType, submitMode = False }, Cmd.none )
+        UpdateOrganizationClassification maybeEntityType ->
+            ( { model | maybeContributorType = maybeEntityType, submitMode = False }, Cmd.none )
 
         UpdateOwner newOwner ->
             let
@@ -556,8 +566,8 @@ update msg model =
         UpdateFamilyOrIndividual contributorType ->
             ( { model | maybeContributorType = Just contributorType }, Cmd.none )
 
-        UpdateEmploymentStatus str ->
-            ( { model | employmentStatus = str }, Cmd.none )
+        UpdateEmploymentStatus val ->
+            ( { model | employmentStatus = Just val }, Cmd.none )
 
         UpdateEmployer str ->
             ( { model | employer = str }, Cmd.none )
@@ -889,6 +899,10 @@ employerOccupationRow model =
 
 employmentStatusRows : Model -> List (Html Msg)
 employmentStatusRows model =
+    let
+        currentVal =
+            Maybe.withDefault "" <| Maybe.map EmploymentStatus.toString model.employmentStatus
+    in
     [ Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
@@ -901,40 +915,22 @@ employmentStatusRows model =
             []
           <|
             Radio.radioList "employmentStatus"
-                [ SelectRadio.view UpdateEmploymentStatus "employed" "Employed" model.employmentStatus
-                , SelectRadio.view UpdateEmploymentStatus "unemployed" "Unemployed" model.employmentStatus
-                , SelectRadio.view UpdateEmploymentStatus "retired" "Retired" model.employmentStatus
-                , SelectRadio.view UpdateEmploymentStatus "self_employed" "Self Employed" model.employmentStatus
+                [ SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Employed) "Employed" "Employed" <| currentVal
+                , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Unemployed) "Unemployed" "Unemployed" <| currentVal
+                , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Retired) "Retired" "Retired" <| currentVal
+                , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.SelfEmployed) "SelfEmployed" "Self Employed" <| currentVal
                 ]
         ]
     ]
 
 
-boolToString : Bool -> String
-boolToString bool =
-    if bool then
-        "true"
-
-    else
-        "false"
-
-
-stringToBool : String -> Bool
-stringToBool str =
-    if str == "true" then
-        True
-
-    else
-        False
-
-
-needEmployerName : String -> Bool
-needEmployerName status =
-    case status of
-        "employed" ->
+needEmployerName : Maybe EmploymentStatus -> Bool
+needEmployerName val =
+    case val of
+        Just EmploymentStatus.Employed ->
             True
 
-        "self_employed" ->
+        Just EmploymentStatus.SelfEmployed ->
             True
 
         _ ->
@@ -1100,53 +1096,42 @@ scrollUp =
 -- HTTP API
 
 
-type alias Contribution =
-    { committeeId : String
-    , firstName : String
-    , lastName : String
-    , employer : Maybe String
-    , addressLine1 : String
-    , addressLine2 : String
-    , city : String
-    , state : String
-    , postalCode : String
-    , amount : Float
-    , creditCardNumber : String
-    , expirationMonth : Float
-    , expirationYear : Float
-    , refCode : Maybe String
-    , paymentMethod : String
-    , contributorType : String
-    , companyName : Maybe String
-    , committeeType : Maybe String
-    , cpfId : Maybe String
-    , principalOfficerFirstName : Maybe String
-    , principalOfficerMiddleName : Maybe String
-    , principalOfficerLastName : Maybe String
-    }
-
-
 encodeContribution : Model -> Encode.Value
 encodeContribution model =
-    Encode.object
+    Encode.object <|
         [ ( "committeeId", Encode.string model.committeeId )
+        , ( "amount", Encode.int <| dollarStringToCents model.amount )
         , ( "firstName", Encode.string model.firstName )
         , ( "lastName", Encode.string model.lastName )
-        , ( "employer", Encode.string model.employer )
         , ( "addressLine1", Encode.string model.address1 )
-        , ( "addressLine2", Encode.string model.address2 )
         , ( "city", Encode.string model.city )
         , ( "state", Encode.string model.state )
         , ( "postalCode", Encode.string model.postalCode )
-        , ( "amount", Encode.int <| dollarStringToCents model.amount )
-        , ( "creditCardNumber", Encode.string "4242424242424242" )
-        , ( "expirationMonth", Encode.int <| numberStringToInt model.expirationMonth )
-        , ( "expirationYear", Encode.int <| numberStringToInt model.expirationYear )
-        , ( "paymentMethod", Encode.string "credit" )
-        , ( "contributorType", Encode.string <| ContributorType.toDataString <| Maybe.withDefault ContributorType.llc model.maybeContributorType )
-        , ( "companyName", Encode.string model.entityName )
-        , ( "refCode", Encode.string model.ref )
+        , ( "entityType", Encode.string <| ContributorType.toDataString <| Maybe.withDefault ContributorType.llc model.maybeContributorType )
+        , ( "emailAddress", Encode.string model.emailAddress )
+        , ( "cardNumber", Encode.string model.cardNumber )
+        , ( "cardExpirationMonth", Encode.int <| numberStringToInt model.expirationMonth )
+        , ( "cardExpirationYear", Encode.int <| numberStringToInt model.expirationYear )
+        , ( "cardCVC", Encode.string model.cvv )
+        , ( "employmentStatus", Encode.string <| Maybe.withDefault "" <| Maybe.map EmploymentStatus.toString model.employmentStatus )
+        , ( "attestsToBeingAnAdultCitizen", Encode.bool model.attestation )
+
+        --, ( "middleName", Encode.string model.middleName )
         ]
+            ++ optionalString "entityName" model.entityName
+            ++ optionalString "employer" model.employer
+            ++ optionalString "occupation" model.occupation
+            ++ optionalString "refCode" model.ref
+            ++ optionalString "addressLine2" model.address2
+
+
+optionalString : String -> String -> List ( String, Value )
+optionalString key val =
+    if val == "" then
+        []
+
+    else
+        [ ( key, Encode.string val ) ]
 
 
 numberStringToInt : String -> Int
@@ -1162,29 +1147,8 @@ dollarStringToCents =
 postContribution : Model -> Cmd Msg
 postContribution model =
     post
-        { url = "http://localhost:5000/contribute"
+        { url = model.endpoint
         , body = jsonBody <| encodeContribution model
         , expect =
             Http.Detailed.expectString GotAPIResponseContribute
         }
-
-
-paymentMethodRows : List (Html Msg)
-paymentMethodRows =
-    let
-        currentValue =
-            "credit"
-    in
-    [ Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
-        [ Grid.col
-            []
-          <|
-            Radio.radioList
-                ""
-                [ SelectRadio.view UpdatePaymentMethod "credit" "Credit/Debit" currentValue
-                , SelectRadio.view UpdatePaymentMethod "" "eCheck" currentValue
-                , SelectRadio.view UpdatePaymentMethod "" "Crypto" currentValue
-                ]
-        ]
-    ]

@@ -7,6 +7,7 @@ export const plaidRenderAndOpen = (linkToken, callback) => {
 
   const plaidLinkElement = document.getElementById('plaid-link')
 
+
   const onSuccess = publicToken => {
     State.setPlaidPublicToken(publicToken);
     ReactDOM.unmountComponentAtNode(plaidLinkElement);
