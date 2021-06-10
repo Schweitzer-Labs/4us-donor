@@ -33,6 +33,7 @@ export ENDPOINT		:= https://cloudformation-fips.$(REGION).amazonaws.com
 export STACK_PARAMS	:= Nonce=$(NONCE)
 
 export BUILD_DIR	:= $(PWD)/.build
+export ELM_BUILD_DIR	:= $(PWD)/build
 
 export TEMPLATE		:= $(BUILD_DIR)/template.yml
 export PACKAGE		:= $(BUILD_DIR)/CloudFormation-template.yml
@@ -80,7 +81,7 @@ build-web: build
 	#npm run build-css
 	@npm \
 		--runenv=$(RUNENV) \
-		--subdomain=$(SUBDOMAIN)-$(RUNENV) --domain=$(DOMAIN) --tld=$(TLD) \
+		--subdomain=$(SUBDOMAIN) --domain=$(DOMAIN) --tld=$(TLD) \
 		run build
 
 deploy-web: build-web
@@ -91,6 +92,7 @@ clean:
 
 realclean: clean
 	@rm -rf $(BUILD_DIR)
+	@rm -rf $(ELM_BUILD_DIR)
 
 package: build
 	@$(MAKE) -C $(CFN_SRC_DIR) package
