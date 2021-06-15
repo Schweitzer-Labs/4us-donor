@@ -2,4 +2,4 @@ OAI:
   Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
   Properties:
     CloudFrontOriginAccessIdentityConfig:
-      Comment: !Sub Origin Access Identity for ${Domain}.${TLD}
+      Comment: !Sub Origin Access Identity for ${SubDomain}.${Domain}.${TLD}
