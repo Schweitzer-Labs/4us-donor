@@ -56,6 +56,18 @@ Distribution:
             - POST
             - PUT
             - DELETE
+        - TargetOriginId: DonorGateway
+          PathPattern: api/platform/*
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: !Ref CachePolicyApiGw
+          AllowedMethods:
+            - HEAD
+            - OPTIONS
+            - GET
+            - PATCH
+            - POST
+            - PUT
+            - DELETE
         - TargetOriginId: CommitteeGateway
           PathPattern: api/committee/*
           ViewerProtocolPolicy: redirect-to-https
