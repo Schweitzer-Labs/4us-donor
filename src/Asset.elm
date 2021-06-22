@@ -1,4 +1,4 @@
-module Asset exposing (Glyph(..), Image(..), amalgamatedLogo, arthurLogo, bellGlyph, binoculars, blockchainDiamond, calendar, checkCircle, checkCircleSelected, circleCheckGlyph, coinsGlyph, defaultAvatar, documents, eightX, error, finicityCircle, finicityCircleSelected, gearHires, genderNeutral, glyph, house, image, johnSaffordHeadShot, lineSelected, lineUnselected, linkGlyph, loading, minusCircleGlyph, person, plaidCircle, plaidCircleSelected, profileCircle, sackDollarGlyph, search, searchDollarGlyph, src, stripeCircle, stripeCircleSelected, stripeLogo, tbdBankLogo, universityGlyph, usLogo, usLogoWing, userGlyph, wiseLogo)
+module Asset exposing (Glyph(..), Image(..), amalgamatedLogo, arthurLogo, bellGlyph, binoculars, blockchainDiamond, calendar, checkCircle, checkCircleSelected, circleCheckGlyph, coinsGlyph, defaultAvatar, documents, eightX, error, finicityCircle, finicityCircleSelected, gearHires, genderNeutral, glyph, house, image, johnSaffordHeadShot, lineSelected, lineUnselected, linkGlyph, loading, minusCircleGlyph, person, placeholderHeadshot, plaidCircle, plaidCircleSelected, profileCircle, sackDollarGlyph, search, searchDollarGlyph, src, stripeCircle, stripeCircleSelected, stripeLogo, tbdBankLogo, universityGlyph, usLogo, usLogoWing, userGlyph, wiseLogo)
 
 {-| Assets, such as images, videos, and audio. (We only have images for now.)
 
@@ -248,6 +248,11 @@ universityGlyph =
 searchDollarGlyph : List (Attribute msg) -> Html msg
 searchDollarGlyph =
     glyph "fas fa-search-dollar"
+
+
+placeholderHeadshot : Image
+placeholderHeadshot =
+    image "placeholder-headshot.png"
 
 
 johnSaffordHeadShot : Image
