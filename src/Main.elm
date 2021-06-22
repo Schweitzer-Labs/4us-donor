@@ -26,7 +26,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode exposing (Value, encode)
 import Mailto
 import OrgOrInd as OrgOrInd exposing (OrgOrInd(..))
-import Owners exposing (Owner, Owners)
+import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
 import State
 import SubmitButton exposing (submitButton)
@@ -34,7 +34,7 @@ import Task
 import Url
 import Url.Parser exposing ((<?>), parse, top)
 import Url.Parser.Query as Query exposing (Parser)
-import Validate exposing (Validator, ifBlank, ifInvalidEmail, ifNothing, validate)
+import Validate exposing (Validator, ifBlank, ifEmptyList, ifInvalidEmail, ifNothing, validate)
 
 
 
@@ -77,7 +77,13 @@ type alias Model =
     , cvv : String
     , amount : String
     , owners : Owners
-    , ownerName : String
+    , ownerFirstName : String
+    , ownerLastName : String
+    , ownerAddress1 : String
+    , ownerAddress2 : String
+    , ownerCity : String
+    , ownerState : String
+    , ownerPostalCode : String
     , ownerOwnership : String
     , ref : String
     , cardNumberIsVisible : Bool
@@ -90,6 +96,10 @@ committeeIdParser =
 
 refParser =
     top <?> Query.string "refCode"
+
+
+amountParser =
+    top <?> Query.string "amount"
 
 
 type alias Config =
@@ -108,15 +118,18 @@ init { host, apiEndpoint } =
 
                 ref =
                     Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse refParser url
+
+                amount =
+                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse amountParser url
             in
-            ( initModel apiEndpoint committeeId ref, Cmd.none )
+            ( initModel apiEndpoint committeeId ref amount, Cmd.none )
 
         Nothing ->
-            ( initModel apiEndpoint "" "", Cmd.none )
+            ( initModel apiEndpoint "" "" "", Cmd.none )
 
 
-initModel : String -> String -> String -> Model
-initModel endpoint committeeId ref =
+initModel : String -> String -> String -> String -> Model
+initModel endpoint committeeId ref amount =
     { endpoint = endpoint
     , committeeId = committeeId
     , donationAmountDisplayState = Open
@@ -145,17 +158,23 @@ initModel endpoint committeeId ref =
     , expirationMonth = ""
     , expirationYear = ""
     , cvv = ""
-    , amount = ""
+    , amount = amount
     , submitMode = False
     , submitting = False
     , submitted = False
     , remaining = Nothing
     , owners = []
-    , ownerName = ""
     , ownerOwnership = ""
     , ref = ref
     , cardNumberIsVisible = False
     , employmentStatus = Nothing
+    , ownerFirstName = ""
+    , ownerLastName = ""
+    , ownerAddress1 = ""
+    , ownerAddress2 = ""
+    , ownerCity = ""
+    , ownerState = ""
+    , ownerPostalCode = ""
     }
 
 
@@ -389,7 +408,13 @@ type Msg
     | UpdateOrganizationClassification (Maybe ContributorType)
     | UpdateFamilyOrIndividual ContributorType
     | AddOwner
-    | UpdateOwnerName String
+    | UpdateOwnerFirstName String
+    | UpdateOwnerLastName String
+    | UpdateOwnerAddress1 String
+    | UpdateOwnerAddress2 String
+    | UpdateOwnerCity String
+    | UpdateOwnerState String
+    | UpdateOwnerPostalCode String
     | UpdateOwnerOwnership String
       -- Payment info
     | UpdateCardNumber String
@@ -475,7 +500,15 @@ update msg model =
                             orgInfoValidator model
 
                         Just Ind ->
-                            indInfoValidator
+                            case model.employmentStatus of
+                                Just EmploymentStatus.Employed ->
+                                    indInfoAndEmployer
+
+                                Just EmploymentStatus.SelfEmployed ->
+                                    indInfoAndEmployer
+
+                                _ ->
+                                    indInfoValidator
 
                         -- @ToDo refactor out this pointless case.
                         Nothing ->
@@ -516,7 +549,7 @@ update msg model =
         UpdateOwner newOwner ->
             let
                 withoutOwner =
-                    List.filter (\{ name } -> name /= newOwner.name) model.owners
+                    List.filter (\owner -> Owner.toHash owner /= Owner.toHash newOwner) model.owners
 
                 withNewOwner =
                     withoutOwner ++ [ newOwner ]
@@ -526,12 +559,64 @@ update msg model =
         AddOwner ->
             let
                 newOwner =
-                    Owner model.ownerName model.ownerOwnership
+                    { firstName = model.ownerFirstName
+                    , lastName = model.ownerLastName
+                    , address1 = model.ownerAddress1
+                    , address2 = model.ownerAddress2
+                    , city = model.ownerCity
+                    , state = model.ownerState
+                    , postalCode = model.ownerPostalCode
+                    , percentOwnership = model.ownerOwnership
+                    }
             in
-            ( { model | owners = model.owners ++ [ newOwner ], ownerOwnership = "", ownerName = "" }, Cmd.none )
+            case validate Owner.validator newOwner of
+                Err messages ->
+                    ( { model | errors = messages }, scrollUp )
 
-        UpdateOwnerName str ->
-            ( { model | ownerName = str }, Cmd.none )
+                _ ->
+                    let
+                        totalPercentage =
+                            Owner.foldOwnership model.owners + (Maybe.withDefault 0 <| String.toFloat newOwner.percentOwnership)
+                    in
+                    if totalPercentage > 100 then
+                        ( { model | errors = [ "Total percentage exceeds 100." ] }, scrollUp )
+
+                    else
+                        ( { model
+                            | owners = model.owners ++ [ newOwner ]
+                            , ownerOwnership = ""
+                            , ownerFirstName = ""
+                            , ownerLastName = ""
+                            , ownerAddress1 = ""
+                            , ownerAddress2 = ""
+                            , ownerCity = ""
+                            , ownerState = ""
+                            , ownerPostalCode = ""
+                            , errors = []
+                          }
+                        , Cmd.none
+                        )
+
+        UpdateOwnerFirstName str ->
+            ( { model | ownerFirstName = str }, Cmd.none )
+
+        UpdateOwnerLastName str ->
+            ( { model | ownerLastName = str }, Cmd.none )
+
+        UpdateOwnerAddress1 str ->
+            ( { model | ownerAddress1 = str }, Cmd.none )
+
+        UpdateOwnerAddress2 str ->
+            ( { model | ownerAddress2 = str }, Cmd.none )
+
+        UpdateOwnerCity str ->
+            ( { model | ownerCity = str }, Cmd.none )
+
+        UpdateOwnerState str ->
+            ( { model | ownerState = str }, Cmd.none )
+
+        UpdateOwnerPostalCode str ->
+            ( { model | ownerPostalCode = str }, Cmd.none )
 
         UpdateOwnerOwnership str ->
             ( { model | ownerOwnership = str }, Cmd.none )
@@ -714,7 +799,7 @@ manageOwnerRows model =
                 List.map
                     (\owner ->
                         Table.tr []
-                            [ Table.td [] [ text owner.name ]
+                            [ Table.td [] [ text <| Owner.toFullName owner ]
                             , Table.td [] [ text owner.percentOwnership ]
                             ]
                     )
@@ -753,11 +838,41 @@ manageOwnerRows model =
                 [ Row.attrs [ Spacing.mt3 ] ]
                 [ Grid.col
                     []
-                    [ inputText UpdateOwnerName "Owner Name" model.ownerName
+                    [ inputText UpdateOwnerFirstName "Owner First Name" model.ownerFirstName
                     ]
                 , Grid.col
                     []
-                    [ inputText UpdateOwnerOwnership "Percent Ownership" model.ownerOwnership ]
+                    [ inputText UpdateOwnerLastName "Owner Last Name" model.ownerLastName ]
+                ]
+           , Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    []
+                    [ inputText UpdateOwnerAddress1 "Owner Address 1" model.ownerAddress1
+                    ]
+                , Grid.col
+                    []
+                    [ inputText UpdateOwnerAddress2 "Owner Address 2" model.ownerAddress2 ]
+                ]
+           , Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    []
+                    [ inputText UpdateOwnerCity "Owner City" model.ownerCity
+                    ]
+                , Grid.col
+                    []
+                    [ State.view UpdateOwnerState model.ownerState ]
+                , Grid.col
+                    []
+                    [ inputText UpdateOwnerPostalCode "Owner Postal Code" model.ownerPostalCode ]
+                ]
+           , Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    []
+                    [ inputNumber UpdateOwnerOwnership "Percent Ownership" model.ownerOwnership
+                    ]
                 ]
            , Grid.row
                 [ Row.attrs [ Spacing.mt3 ] ]
@@ -1057,7 +1172,27 @@ organizationValidator =
 
 indInfoValidator : Validator String Model
 indInfoValidator =
-    Validate.firstError [ piiValidator, familyValidator ]
+    Validate.firstError [ piiValidator, familyValidator, employmentValidator ]
+
+
+indInfoAndEmployer : Validator String Model
+indInfoAndEmployer =
+    Validate.firstError [ piiValidator, familyValidator, employmentValidator, employerValidator ]
+
+
+employmentValidator : Validator String Model
+employmentValidator =
+    Validate.all
+        [ ifNothing .employmentStatus "Please specify your employment status."
+        ]
+
+
+employerValidator : Validator String Model
+employerValidator =
+    Validate.all
+        [ ifBlank .employer "Please specify your employer."
+        , ifBlank .occupation "Please specify your occupation."
+        ]
 
 
 orgInfoValidator : Model -> Validator String Model
@@ -1065,7 +1200,7 @@ orgInfoValidator model =
     let
         extra =
             if isLLCDonor model then
-                []
+                [ ifEmptyList .owners "Please specify the ownership breakdown for your LLC." ]
 
             else
                 []
