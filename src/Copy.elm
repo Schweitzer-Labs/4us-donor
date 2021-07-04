@@ -51,7 +51,7 @@ contributionEmailHref =
 
 attestation : String
 attestation =
-    "By checking this box I am confirming that I am an American citizen and at least eighteen years of age."
+    "By checking this box I am confirming that I am a US Citizen or Permanent Resident and at least eighteen years of age."
 
 
 promoCopyFormatter : String -> String -> List (Html msg)
