@@ -11,7 +11,7 @@ import Html exposing (Html, div, h1, img, p, text)
 import Html.Attributes exposing (class)
 
 
-view : String -> Html msg -> Html msg
+view : String -> Html msg -> {title: String, body: List (Html msg)}
 view committeeId form =
     case committeeId of
         "john-safford" ->
@@ -21,11 +21,15 @@ view committeeId form =
             committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot committeeId form
 
         _ ->
-            div [] []
+            { title = ""
+            , body = [Html.text ""]
+            }
 
 
-committeePage : Html msg -> String -> Image -> String -> Html msg -> Html msg
+committeePage : Html msg -> String -> Image -> String -> Html msg -> {title: String, body: List (Html msg)}
 committeePage promoCopy promoHeading headshot committeeId form =
+    {  title = "Test"
+     , body = [
     div
         [ Spacing.pl2Md, Spacing.pr2Md ]
         [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ text promoHeading ] ]
@@ -44,3 +48,5 @@ committeePage promoCopy promoHeading headshot committeeId form =
                 ]
             ]
         ]
+        ]
+    }

@@ -184,7 +184,7 @@ type DisplayState
     | Closed
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     CommitteePage.view model.committeeId (stateView model)
 
@@ -752,7 +752,7 @@ update msg model =
 
 main : Program Config Model Msg
 main =
-    Browser.element
+    Browser.document
         { init = init
         , subscriptions = \n -> Sub.none
         , update = update
