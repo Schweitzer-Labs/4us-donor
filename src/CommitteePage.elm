@@ -5,6 +5,7 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
 import Bootstrap.Utilities.Spacing as Spacing
+import Content.IanCain as IanCain
 import Content.JohnSafford as JohnSafford
 import Content.WillSchweitzer as WillSchweitzer
 import Html exposing (Html, div, h1, img, p, text)
@@ -17,11 +18,11 @@ view committeeId form =
         "john-safford" ->
             committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot committeeId form
 
-        "will-schweitzer" ->
-            committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot committeeId form
+        "ian-cain" ->
+            committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot committeeId form
 
         _ ->
-            div [] []
+            committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot committeeId form
 
 
 committeePage : Html msg -> String -> Image -> String -> Html msg -> Html msg

@@ -28,6 +28,7 @@ import Mailto
 import OrgOrInd as OrgOrInd exposing (OrgOrInd(..))
 import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
+import Settings
 import State
 import SubmitButton exposing (submitButton)
 import Task
@@ -87,6 +88,7 @@ type alias Model =
     , ownerOwnership : String
     , ref : String
     , cardNumberIsVisible : Bool
+    , settings : Settings.Model
     }
 
 
@@ -175,6 +177,7 @@ initModel endpoint committeeId ref amount =
     , ownerCity = ""
     , ownerState = ""
     , ownerPostalCode = ""
+    , settings = Settings.init
     }
 
 
