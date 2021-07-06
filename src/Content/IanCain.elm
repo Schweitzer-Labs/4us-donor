@@ -1,12 +1,14 @@
 module Content.IanCain exposing (firstCopy, firstHeading, promoContent, promoHeading)
 
+import Asset
 import Content.Generic exposing (promoCopyFormatter)
-import Html exposing (Html, div, h4, text)
+import Html exposing (Html, div, h4, img, text)
+import Html.Attributes exposing (class)
 
 
-promoHeading : String
+promoHeading : Html msg
 promoHeading =
-    "Ian Cain for Ward 3"
+    img [ Asset.src Asset.ianCainLogo, class "w-50" ] []
 
 
 firstHeading =

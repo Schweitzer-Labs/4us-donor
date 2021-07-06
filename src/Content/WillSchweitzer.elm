@@ -19,9 +19,9 @@ emailBody =
     "I’d like to donate more but I’ve reached the limit."
 
 
-promoHeading : String
+promoHeading : Html msg
 promoHeading =
-    "Will Schweitzer for Supervisor"
+    text "Will Schweitzer for Supervisor"
 
 
 firstHeading =

@@ -25,11 +25,11 @@ view committeeId form =
             committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form
 
 
-committeePage : Html msg -> String -> Image -> Html msg -> Html msg
+committeePage : Html msg -> Html msg -> Image -> Html msg -> Html msg
 committeePage promoCopy promoHeading headshot form =
     div
         [ Spacing.pl2Md, Spacing.pr2Md ]
-        [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ text promoHeading ] ]
+        [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ promoHeading ] ]
         , Grid.containerFluid
             []
             [ Grid.row

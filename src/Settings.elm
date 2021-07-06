@@ -1,6 +1,5 @@
 module Settings exposing (Model, get, init, toJustOrgOrNothing)
 
-import EntityType
 import OrgOrInd
 
 
