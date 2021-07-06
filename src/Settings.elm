@@ -1,4 +1,7 @@
-module Settings exposing (Model, init)
+module Settings exposing (Model, get, init, toJustOrgOrNothing)
+
+import EntityType
+import OrgOrInd
 
 
 type alias Model =
@@ -22,3 +25,12 @@ get committeeId =
 
         _ ->
             init
+
+
+toJustOrgOrNothing : Model -> Maybe OrgOrInd.Model
+toJustOrgOrNothing model =
+    if not model.complianceEnabled then
+        Just OrgOrInd.Ind
+
+    else
+        Nothing

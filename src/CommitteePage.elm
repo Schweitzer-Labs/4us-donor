@@ -16,17 +16,17 @@ view : String -> Html msg -> Html msg
 view committeeId form =
     case committeeId of
         "john-safford" ->
-            committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot committeeId form
+            committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot form
 
         "ian-cain" ->
-            committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot committeeId form
+            committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form
 
         _ ->
-            committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot committeeId form
+            committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form
 
 
-committeePage : Html msg -> String -> Image -> String -> Html msg -> Html msg
-committeePage promoCopy promoHeading headshot committeeId form =
+committeePage : Html msg -> String -> Image -> Html msg -> Html msg
+committeePage promoCopy promoHeading headshot form =
     div
         [ Spacing.pl2Md, Spacing.pr2Md ]
         [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ text promoHeading ] ]

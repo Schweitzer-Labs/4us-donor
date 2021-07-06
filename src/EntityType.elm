@@ -1,4 +1,4 @@
-module ContributorType exposing (ContributorType, familyRadioList, isLLC, llc, orgView, toDataString, toDisplayString)
+module EntityType exposing (Model(..), familyRadioList, isLLC, llc, orgView, toDataString, toDisplayString)
 
 import Bootstrap.Form.Radio as Radio
 import Bootstrap.Form.Select as Select exposing (Item)
@@ -6,7 +6,7 @@ import Html exposing (Html, text)
 import Html.Attributes exposing (class, selected, value)
 
 
-type ContributorType
+type Model
     = Family
     | Individual
     | SoleProprietorship
@@ -21,7 +21,7 @@ type ContributorType
     | Other
 
 
-toDataString : ContributorType -> String
+toDataString : Model -> String
 toDataString contributorType =
     case contributorType of
         Family ->
@@ -61,7 +61,7 @@ toDataString contributorType =
             "Oth"
 
 
-fromString : String -> Maybe ContributorType
+fromString : String -> Maybe Model
 fromString str =
     case str of
         "Fam" ->
@@ -104,7 +104,7 @@ fromString str =
             Nothing
 
 
-toDisplayString : ContributorType -> String
+toDisplayString : Model -> String
 toDisplayString contributorType =
     case contributorType of
         Family ->
@@ -144,7 +144,7 @@ toDisplayString contributorType =
             "Other"
 
 
-orgView : (Maybe ContributorType -> msg) -> Maybe ContributorType -> Html msg
+orgView : (Maybe Model -> msg) -> Maybe Model -> Html msg
 orgView msg currentValue =
     Select.select
         [ Select.id "contributorType"
@@ -164,7 +164,7 @@ orgView msg currentValue =
         ]
 
 
-orgSelect : ContributorType -> Maybe ContributorType -> Item msg
+orgSelect : Model -> Maybe Model -> Item msg
 orgSelect contributorType currentValue =
     Select.item
         [ value <| toDataString contributorType
@@ -173,7 +173,7 @@ orgSelect contributorType currentValue =
         [ text <| toDisplayString contributorType ]
 
 
-familyRadioList : (ContributorType -> msg) -> Maybe ContributorType -> List (Html msg)
+familyRadioList : (Model -> msg) -> Maybe Model -> List (Html msg)
 familyRadioList msg currentValue =
     Radio.radioList "familyOfCandidate"
         [ Radio.createCustom
@@ -193,11 +193,11 @@ familyRadioList msg currentValue =
         ]
 
 
-isLLC : ContributorType -> Bool
+isLLC : Model -> Bool
 isLLC contributorType =
     contributorType == LimitedLiabilityCompany
 
 
-llc : ContributorType
+llc : Model
 llc =
     LimitedLiabilityCompany
