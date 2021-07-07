@@ -8,7 +8,7 @@ import Html.Attributes exposing (class)
 
 promoHeading : Html msg
 promoHeading =
-    img [ Asset.src Asset.ianCainLogo, class "w-50" ] []
+    img [ Asset.src Asset.ianCainLogo, class "w-100" ] []
 
 
 firstHeading =
