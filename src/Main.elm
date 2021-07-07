@@ -922,47 +922,52 @@ orgRows model =
            ]
 
 
+mobileColSpacing : List (Attribute msg)
+mobileColSpacing =
+    [ Spacing.mt3, Spacing.mtAutoMd ]
+
+
 piiRows : Model -> List (Html Msg)
 piiRows model =
     [ Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputEmail UpdateEmailAddress "Email Address" model.emailAddress ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdatePhoneNumber "Phone Number" model.phoneNumber ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateFirstName "First Name" model.firstName ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateLastName "Last Name" model.lastName ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateAddress1 "Address 1" model.address1
             ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateAddress2 "Address 2" model.address2
             ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputText UpdateCity "City" model.city ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
             [ State.view UpdateState model.state ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputText UpdatePostalCode "Zip" model.postalCode
             ]
         ]
@@ -1100,21 +1105,21 @@ paymentDetailsRows model =
             ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            [ Col.xs4 ]
+            [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputNumber UpdateExpirationMonth "MM*" model.expirationMonth ]
         , Grid.col
-            [ Col.xs4 ]
+            [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputNumber UpdateExpirationYear "YYYY*" model.expirationYear ]
         , Grid.col
-            [ Col.xs4 ]
+            [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputSecure UpdateCVV "CVV*" model.cvv ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt5 ] ]
+        [ Row.attrs [ Spacing.mt4 ] ]
         [ Grid.col
-            []
+            [ Col.md ]
             donateButtonOrNot
         ]
     ]
