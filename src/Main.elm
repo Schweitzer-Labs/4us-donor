@@ -35,7 +35,7 @@ import Task
 import Url
 import Url.Parser exposing ((<?>), parse, top)
 import Url.Parser.Query as Query exposing (Parser)
-import Validate exposing (Validator, ifBlank, ifEmptyList, ifInvalidEmail, ifNothing, validate)
+import Validate exposing (Validator, fromErrors, ifBlank, ifEmptyList, ifInvalidEmail, ifNothing, validate)
 
 
 
@@ -1161,6 +1161,27 @@ amountValidator =
     ifBlank .amount "Please choose an amount to donate."
 
 
+postalCodeValidator : Validator String Model
+postalCodeValidator =
+    fromErrors postalCodeToErrors
+
+
+postalCodeToErrors : Model -> List String
+postalCodeToErrors model =
+    let
+        length =
+            String.length <| model.postalCode
+    in
+    if length < 5 then
+        [ "ZIP code is too short." ]
+
+    else if length > 9 then
+        [ "ZIP code is too long." ]
+
+    else
+        []
+
+
 piiValidator : Validator String Model
 piiValidator =
     Validate.firstError
@@ -1171,6 +1192,7 @@ piiValidator =
         , ifBlank .city "City is missing."
         , ifBlank .state "State is missing."
         , ifBlank .postalCode "Postal Code is missing."
+        , postalCodeValidator
         ]
 
 
