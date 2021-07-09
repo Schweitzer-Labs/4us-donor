@@ -14,6 +14,7 @@ import Bootstrap.Utilities.Spacing as Spacing
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommitteePage
+import Content.IanCain as IanCain
 import Copy
 import EmploymentStatus exposing (EmploymentStatus)
 import EntityType
@@ -196,6 +197,16 @@ view model =
     CommitteePage.view model.committeeId (stateView model)
 
 
+footerCopy : Model -> List (Html Msg)
+footerCopy model =
+    case model.committeeId of
+        "ian-cain" ->
+            IanCain.footerCopy
+
+        _ ->
+            []
+
+
 stateView : Model -> Html Msg
 stateView model =
     if model.submitted then
@@ -224,6 +235,7 @@ stateView model =
              , providePaymentDetailsView model
              ]
                 ++ donateButtonOrNot
+                ++ footerCopy model
                 ++ [ logoDiv ]
             )
 
