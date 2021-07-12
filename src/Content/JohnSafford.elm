@@ -4,9 +4,9 @@ import Content.Generic exposing (promoCopyFormatter)
 import Html exposing (Html, div, h4, text)
 
 
-promoHeading : String
+promoHeading : Html msg
 promoHeading =
-    "John Safford for Supervisor"
+    text "John Safford for Supervisor"
 
 
 firstHeading =

@@ -14,9 +14,10 @@ import Bootstrap.Utilities.Spacing as Spacing
 import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommitteePage
-import ContributorType exposing (ContributorType)
+import Content.IanCain as IanCain
 import Copy
 import EmploymentStatus exposing (EmploymentStatus)
+import EntityType
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
@@ -25,16 +26,17 @@ import Http.Detailed
 import Json.Decode as Decode
 import Json.Encode as Encode exposing (Value, encode)
 import Mailto
-import OrgOrInd as OrgOrInd exposing (OrgOrInd(..))
+import OrgOrInd
 import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
+import Settings
 import State
 import SubmitButton exposing (submitButton)
 import Task
 import Url
 import Url.Parser exposing ((<?>), parse, top)
 import Url.Parser.Query as Query exposing (Parser)
-import Validate exposing (Validator, ifBlank, ifEmptyList, ifInvalidEmail, ifNothing, validate)
+import Validate exposing (Validator, fromErrors, ifBlank, ifEmptyList, ifInvalidEmail, ifNothing, validate)
 
 
 
@@ -68,8 +70,8 @@ type alias Model =
     , employer : String
     , occupation : String
     , entityName : String
-    , maybeOrgOrInd : Maybe OrgOrInd
-    , maybeContributorType : Maybe ContributorType
+    , maybeOrgOrInd : Maybe OrgOrInd.Model
+    , maybeContributorType : Maybe EntityType.Model
     , attestation : Bool
     , cardNumber : String
     , expirationMonth : String
@@ -87,6 +89,7 @@ type alias Model =
     , ownerOwnership : String
     , ref : String
     , cardNumberIsVisible : Bool
+    , settings : Settings.Model
     }
 
 
@@ -130,6 +133,10 @@ init { host, apiEndpoint } =
 
 initModel : String -> String -> String -> String -> Model
 initModel endpoint committeeId ref amount =
+    let
+        settings =
+            Settings.get committeeId
+    in
     { endpoint = endpoint
     , committeeId = committeeId
     , donationAmountDisplayState = Open
@@ -153,7 +160,7 @@ initModel endpoint committeeId ref amount =
     , occupation = ""
     , entityName = ""
     , maybeContributorType = Nothing
-    , maybeOrgOrInd = Nothing
+    , maybeOrgOrInd = Settings.toJustOrgOrNothing settings
     , cardNumber = ""
     , expirationMonth = ""
     , expirationYear = ""
@@ -175,6 +182,7 @@ initModel endpoint committeeId ref amount =
     , ownerCity = ""
     , ownerState = ""
     , ownerPostalCode = ""
+    , settings = Settings.get committeeId
     }
 
 
@@ -187,6 +195,16 @@ type DisplayState
 view : Model -> Document Msg
 view model =
     CommitteePage.view model.committeeId (stateView model)
+
+
+footerCopy : Model -> List (Html Msg)
+footerCopy model =
+    case model.committeeId of
+        "ian-cain" ->
+            IanCain.footerCopy
+
+        _ ->
+            []
 
 
 stateView : Model -> Html Msg
@@ -217,6 +235,7 @@ stateView model =
              , providePaymentDetailsView model
              ]
                 ++ donateButtonOrNot
+                ++ footerCopy model
                 ++ [ logoDiv ]
             )
 
@@ -318,14 +337,14 @@ donationAmountView model =
 donorInfoTitle : Model -> Html Msg
 donorInfoTitle model =
     case model.maybeOrgOrInd of
-        Just Org ->
+        Just OrgOrInd.Org ->
             if String.length model.entityName > 0 then
                 titleWithData "Donor Info" model.entityName
 
             else
                 text "Donor Info"
 
-        Just Ind ->
+        Just OrgOrInd.Ind ->
             let
                 fullName =
                     model.firstName ++ " " ++ model.lastName
@@ -345,10 +364,10 @@ provideDonorInfoView model =
     let
         formRows =
             case model.maybeOrgOrInd of
-                Just Org ->
+                Just OrgOrInd.Org ->
                     orgRows model ++ piiRows model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
 
-                Just Ind ->
+                Just OrgOrInd.Ind ->
                     piiRows model ++ employmentRows model ++ familyRow model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
 
                 Nothing ->
@@ -391,7 +410,7 @@ providePaymentDetailsView model =
 type Msg
     = AmountUpdated String
       -- Donor info
-    | ChooseOrgOrInd (Maybe OrgOrInd)
+    | ChooseOrgOrInd (Maybe OrgOrInd.Model)
     | UpdateEmailAddress String
     | UpdatePhoneNumber String
     | UpdateFirstName String
@@ -405,8 +424,8 @@ type Msg
     | UpdateEmployer String
     | UpdateOccupation String
     | UpdateOrganizationName String
-    | UpdateOrganizationClassification (Maybe ContributorType)
-    | UpdateFamilyOrIndividual ContributorType
+    | UpdateOrganizationClassification (Maybe EntityType.Model)
+    | UpdateFamilyOrIndividual EntityType.Model
     | AddOwner
     | UpdateOwnerFirstName String
     | UpdateOwnerLastName String
@@ -496,10 +515,10 @@ update msg model =
             let
                 validator =
                     case model.maybeOrgOrInd of
-                        Just Org ->
+                        Just OrgOrInd.Org ->
                             orgInfoValidator model
 
-                        Just Ind ->
+                        Just OrgOrInd.Ind ->
                             case model.employmentStatus of
                                 Just EmploymentStatus.Employed ->
                                     indInfoAndEmployer
@@ -783,7 +802,7 @@ sendMessageButton model =
 
 isLLCDonor : Model -> Bool
 isLLCDonor model =
-    Maybe.withDefault False (Maybe.map ContributorType.isLLC model.maybeContributorType)
+    Maybe.withDefault False (Maybe.map EntityType.isLLC model.maybeContributorType)
 
 
 
@@ -897,7 +916,7 @@ orgRows model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ ContributorType.orgView UpdateOrganizationClassification model.maybeContributorType ]
+            [ EntityType.orgView UpdateOrganizationClassification model.maybeContributorType ]
         ]
     ]
         ++ llcRow
@@ -915,47 +934,52 @@ orgRows model =
            ]
 
 
+mobileColSpacing : List (Attribute msg)
+mobileColSpacing =
+    [ Spacing.mt3, Spacing.mtAutoMd ]
+
+
 piiRows : Model -> List (Html Msg)
 piiRows model =
     [ Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputEmail UpdateEmailAddress "Email Address" model.emailAddress ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdatePhoneNumber "Phone Number" model.phoneNumber ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateFirstName "First Name" model.firstName ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateLastName "Last Name" model.lastName ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateAddress1 "Address 1" model.address1
             ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
             [ inputText UpdateAddress2 "Address 2" model.address2
             ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            []
+            [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputText UpdateCity "City" model.city ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
             [ State.view UpdateState model.state ]
         , Grid.col
-            []
+            [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputText UpdatePostalCode "Zip" model.postalCode
             ]
         ]
@@ -977,26 +1001,31 @@ familyRow model =
         [ Grid.col
             []
           <|
-            ContributorType.familyRadioList UpdateFamilyOrIndividual model.maybeContributorType
+            EntityType.familyRadioList UpdateFamilyOrIndividual model.maybeContributorType
         ]
     ]
 
 
 orgOrIndRow : Model -> List (Html Msg)
 orgOrIndRow model =
-    [ Grid.row
-        [ Row.attrs [ Spacing.mt2 ] ]
-        [ Grid.col
+    case model.settings.complianceEnabled of
+        True ->
+            [ Grid.row
+                [ Row.attrs [ Spacing.mt2 ] ]
+                [ Grid.col
+                    []
+                    [ text "Will you be donating as an individual or on behalf of an organization?" ]
+                ]
+            , Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    []
+                    [ OrgOrInd.row ChooseOrgOrInd model.maybeOrgOrInd ]
+                ]
+            ]
+
+        False ->
             []
-            [ text "Will you be donating as an individual or on behalf of an organization?" ]
-        ]
-    , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
-        [ Grid.col
-            []
-            [ OrgOrInd.row ChooseOrgOrInd model.maybeOrgOrInd ]
-        ]
-    ]
 
 
 employerOccupationRow : Model -> Html Msg
@@ -1088,21 +1117,21 @@ paymentDetailsRows model =
             ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
+        [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
-            [ Col.xs4 ]
+            [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputNumber UpdateExpirationMonth "MM*" model.expirationMonth ]
         , Grid.col
-            [ Col.xs4 ]
+            [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputNumber UpdateExpirationYear "YYYY*" model.expirationYear ]
         , Grid.col
-            [ Col.xs4 ]
+            [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
             [ inputSecure UpdateCVV "CVV*" model.cvv ]
         ]
     , Grid.row
-        [ Row.attrs [ Spacing.mt5 ] ]
+        [ Row.attrs [ Spacing.mt4 ] ]
         [ Grid.col
-            []
+            [ Col.md ]
             donateButtonOrNot
         ]
     ]
@@ -1144,6 +1173,27 @@ amountValidator =
     ifBlank .amount "Please choose an amount to donate."
 
 
+postalCodeValidator : Validator String Model
+postalCodeValidator =
+    fromErrors postalCodeToErrors
+
+
+postalCodeToErrors : Model -> List String
+postalCodeToErrors model =
+    let
+        length =
+            String.length <| model.postalCode
+    in
+    if length < 5 then
+        [ "ZIP code is too short." ]
+
+    else if length > 9 then
+        [ "ZIP code is too long." ]
+
+    else
+        []
+
+
 piiValidator : Validator String Model
 piiValidator =
     Validate.firstError
@@ -1154,6 +1204,7 @@ piiValidator =
         , ifBlank .city "City is missing."
         , ifBlank .state "State is missing."
         , ifBlank .postalCode "Postal Code is missing."
+        , postalCodeValidator
         ]
 
 
@@ -1242,7 +1293,7 @@ encodeContribution model =
         , ( "city", Encode.string model.city )
         , ( "state", Encode.string model.state )
         , ( "postalCode", Encode.string model.postalCode )
-        , ( "entityType", Encode.string <| ContributorType.toDataString <| Maybe.withDefault ContributorType.llc model.maybeContributorType )
+        , ( "entityType", Encode.string <| EntityType.toDataString <| Maybe.withDefault EntityType.llc model.maybeContributorType )
         , ( "emailAddress", Encode.string model.emailAddress )
         , ( "cardNumber", Encode.string model.cardNumber )
         , ( "cardExpirationMonth", Encode.int <| numberStringToInt model.expirationMonth )

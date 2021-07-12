@@ -5,34 +5,31 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
 import Bootstrap.Utilities.Spacing as Spacing
+import Content.IanCain as IanCain
 import Content.JohnSafford as JohnSafford
 import Content.WillSchweitzer as WillSchweitzer
 import Html exposing (Html, div, h1, img, p, text)
 import Html.Attributes exposing (class)
 
 
-view : String -> Html msg -> {title: String, body: List (Html msg)}
+view : String -> Html msg -> { title : String, body : List (Html msg) }
 view committeeId form =
     case committeeId of
         "john-safford" ->
-            committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot committeeId form
+            { title = "John Safford Committee", body = committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot form }
 
-        "will-schweitzer" ->
-            committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot committeeId form
+        "ian-cain" ->
+            { title = "Ian Cain Committee", body = committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form }
 
         _ ->
-            { title = ""
-            , body = [Html.text ""]
-            }
+            { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
 
 
-committeePage : Html msg -> String -> Image -> String -> Html msg -> {title: String, body: List (Html msg)}
-committeePage promoCopy promoHeading headshot committeeId form =
-    {  title = "Test"
-     , body = [
-    div
+committeePage : Html msg -> Html msg -> Image -> Html msg -> List (Html msg)
+committeePage promoCopy promoHeading headshot form =
+    [ div
         [ Spacing.pl2Md, Spacing.pr2Md ]
-        [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ text promoHeading ] ]
+        [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ promoHeading ] ]
         , Grid.containerFluid
             []
             [ Grid.row
@@ -48,5 +45,4 @@ committeePage promoCopy promoHeading headshot committeeId form =
                 ]
             ]
         ]
-        ]
-    }
+    ]

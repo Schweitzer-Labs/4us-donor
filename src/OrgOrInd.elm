@@ -1,4 +1,4 @@
-module OrgOrInd exposing (OrgOrInd(..), row)
+module OrgOrInd exposing (Model(..), row)
 
 import Bootstrap.Button as Button
 import Bootstrap.Grid as Grid
@@ -6,12 +6,12 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, id)
 
 
-type OrgOrInd
+type Model
     = Org
     | Ind
 
 
-toString : OrgOrInd -> String
+toString : Model -> String
 toString orgOrInd =
     case orgOrInd of
         Org ->
@@ -21,7 +21,7 @@ toString orgOrInd =
             "Individual"
 
 
-row : (Maybe OrgOrInd -> msg) -> Maybe OrgOrInd -> Html msg
+row : (Maybe Model -> msg) -> Maybe Model -> Html msg
 row msg currentValue =
     Grid.row
         []
