@@ -12,22 +12,22 @@ import Html exposing (Html, div, h1, img, p, text)
 import Html.Attributes exposing (class)
 
 
-view : String -> Html msg -> Html msg
+view : String -> Html msg -> { title : String, body : List (Html msg) }
 view committeeId form =
     case committeeId of
         "john-safford" ->
-            committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot form
+            { title = "John Safford Committee", body = committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot form }
 
         "ian-cain" ->
-            committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form
+            { title = "Ian Cain Committee", body = committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form }
 
         _ ->
-            committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form
+            { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
 
 
-committeePage : Html msg -> Html msg -> Image -> Html msg -> Html msg
+committeePage : Html msg -> Html msg -> Image -> Html msg -> List (Html msg)
 committeePage promoCopy promoHeading headshot form =
-    div
+    [ div
         [ Spacing.pl2Md, Spacing.pr2Md ]
         [ div [ class "text-center", Spacing.p5 ] [ h1 [ Spacing.pl3, Spacing.pl4Md, class "bigger-than-h1" ] [ promoHeading ] ]
         , Grid.containerFluid
@@ -45,3 +45,4 @@ committeePage promoCopy promoHeading headshot form =
                 ]
             ]
         ]
+    ]
