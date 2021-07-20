@@ -2,7 +2,6 @@ name: 4US Backend
 on:
   push:
     branches:
-      - FUS-316
       - qa
       - prod
 jobs:
@@ -41,9 +40,4 @@ jobs:
           echo "RUNENV=prod" >> $GITHUB_ENV
       - name: Assemble and Deploy CloudFormation Stacks
         run: |
-          echo "make RUNENV=${{ env.RUNENV }} clean deploy"
-      - name: Beachhead
-        run: |
-          make clean deploy
-
-
+          make RUNENV=${{ env.RUNENV }} clean deploy
