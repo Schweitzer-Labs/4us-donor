@@ -41,7 +41,7 @@ jobs:
           echo "RUNENV=prod" >> $GITHUB_ENV
       - name: Assemble and Deploy CloudFormation Stacks
         run: |
-          make RUNENV=${{ env.RUNENV }} clean deploy
+          echo "make RUNENV=${{ env.RUNENV }} clean deploy"
       - name: Beachhead
         run: |
           make clean deploy
