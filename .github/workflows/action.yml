@@ -53,7 +53,7 @@ jobs:
         run: |
           echo "RUNENV=prod" >> $GITHUB_ENV
       - name: Set environment to Demo
-        id: env-prod
+        id: env-demo
         if: endsWith(github.ref, '/demo')
         run: |
           echo "RUNENV=demo" >> $GITHUB_ENV
