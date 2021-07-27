@@ -26,11 +26,8 @@ endif
 export STACK		:= $(RUNENV)-$(PRODUCT)-$(SUBDOMAIN)
 
 export DATE		:= $(shell date)
-export NONCE		:= $(shell uuidgen | cut -d\- -f1)
 
 export ENDPOINT		:= https://cloudformation-fips.$(REGION).amazonaws.com
-
-export STACK_PARAMS	:= Nonce=$(NONCE)
 
 export BUILD_DIR	:= $(PWD)/.build
 export ELM_BUILD_DIR	:= $(PWD)/build
