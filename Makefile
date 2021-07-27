@@ -73,7 +73,7 @@ check: build
 
 build-committees: $(COMMITTEE_SRCS)
 
-build-web: build
+build-web: $(BUILD_DIR)
 	@npm install
 	#npm run build-css
 	@npm \
