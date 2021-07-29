@@ -26,11 +26,8 @@ endif
 export STACK		:= $(RUNENV)-$(PRODUCT)-$(SUBDOMAIN)
 
 export DATE		:= $(shell date)
-export NONCE		:= $(shell uuidgen | cut -d\- -f1)
 
 export ENDPOINT		:= https://cloudformation-fips.$(REGION).amazonaws.com
-
-export STACK_PARAMS	:= Nonce=$(NONCE)
 
 export BUILD_DIR	:= $(PWD)/.build
 export ELM_BUILD_DIR	:= $(PWD)/build
@@ -62,7 +59,7 @@ COMMITTEE_DIR		:= committees/$(COMMITTEE)
 all: build
 
 dep:
-	@pip3 install jinja2 cfn_flip boto3
+	@pip3 install -r requirements.txt
 
 build: $(BUILD_DIR)
 	@$(MAKE) -C $(CFN_SRC_DIR) build
@@ -76,7 +73,7 @@ check: build
 
 build-committees: $(COMMITTEE_SRCS)
 
-build-web: build
+build-web: $(BUILD_DIR)
 	@npm install
 	#npm run build-css
 	@npm \
