@@ -52,6 +52,14 @@ jobs:
         if: endsWith(github.ref, '/prod')
         run: |
           echo "RUNENV=prod" >> $GITHUB_ENV
+      - name: Assemble CloudFormation Stack
+        id: assemble-cloudformation-stack
+        run: |
+          make RUNENV=${{ env.RUNENV }} clean build-stacks
+      - name: Generate and Upload CloudFormation Package
+        id: generate-and-upload-cloudformation-package
+        run: |
+          make RUNENV=${{ env.RUNENV }} package
       - name: Assemble and Deploy CloudFormation Stacks
         id: deploy-cloudformation-stack-to-aws
         run: |
