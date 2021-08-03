@@ -62,6 +62,9 @@ all: build
 dep:
 	@pip3 install -r requirements.txt
 
+install-build-tools:
+	@npm install create-elm-app
+
 clean:
 	@rm -f $(BUILD_DIR)/*.yml
 
