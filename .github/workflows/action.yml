@@ -61,7 +61,12 @@ jobs:
       - name: Assemble and Deploy CloudFormation Stacks
         id: deploy-to-aws
         run: |
-          make RUNENV=${{ env.RUNENV }} clean deploy
+          make RUNENV=${{ env.RUNENV }} deploy-infra
+      - name: Deploy WebApp assets to the S3 Bucket
+        id: deploy-webapp-assets-to-s3
+        if: !endsWith(github.ref, '/demo')
+        run: |
+          make RUNENV=${{ env.RUNENV }} deploy-web
       - uses: act10ns/slack@v1
         with:
           status: ${{ job.status }}
