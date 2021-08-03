@@ -58,7 +58,7 @@ jobs:
           make RUNENV=${{ env.RUNENV }} deploy-infra
       - name: Deploy WebApp assets to the S3 Bucket
         id: deploy-webapp-assets-to-s3-bucket
-        if: !endsWith(github.ref, '/demo')
+        if: endsWith(github.ref, '/demo') != true
         run: |
           make RUNENV=${{ env.RUNENV }} deploy-web
       - uses: act10ns/slack@v1
