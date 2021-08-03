@@ -13,7 +13,6 @@
     "proxy-qa": "lcp --proxyUrl https://donate.build4.us/api/platform/contribute --port=8012",
     "start": "PORT=3001 ELM_APP_API_ENDPOINT=http://localhost:8012/proxy elm-app start",
     "build": "ELM_APP_API_ENDPOINT=https://$npm_config_subdomain.$npm_config_domain.$npm_config_tld/api/platform/contribute elm-app build"
-    "build-demo": "ELM_APP_API_ENDPOINT=https://$npm_config_subdomain-api.$npm_config_domain.$npm_config_tld/api/platform/contribute elm-app build"
   },
   "author": "",
   "license": "ISC",
