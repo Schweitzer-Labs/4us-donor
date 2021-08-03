@@ -62,15 +62,20 @@ all: build
 dep:
 	@pip3 install -r requirements.txt
 
-build: $(BUILD_DIR)
+clean:
+	@rm -f $(BUILD_DIR)/*.yml
+
+realclean: clean
+	@rm -rf $(BUILD_DIR)
+	@rm -rf $(ELM_BUILD_DIR)
+
+build: build-stacks build-web
+
+build-stacks: $(BUILD_DIR)
 	@$(MAKE) -C $(CFN_SRC_DIR) build
 
 $(BUILD_DIR):
 	@mkdir -p $@
-
-check: build
-	@$(MAKE) -C $(CFN_SRC_DIR) check
-
 
 build-committees: $(COMMITTEE_SRCS)
 
@@ -82,29 +87,25 @@ build-web: $(BUILD_DIR)
 		--subdomain=$(SUBDOMAIN) --domain=$(DOMAIN) --tld=$(TLD) \
 		run build
 
-deploy-web: build-web
-	aws s3 sync build/ s3://$(WEB_BUCKET)/
-
-clean:
-	@rm -f $(BUILD_DIR)/*.yml
-
-realclean: clean
-	@rm -rf $(BUILD_DIR)
-	@rm -rf $(ELM_BUILD_DIR)
+check: build
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
 
 package: build
-	@$(MAKE) -C $(CFN_SRC_DIR) package
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
 
 deploy-infra: package
 	@$(MAKE) -C $(CFN_SRC_DIR) deploy
 
+deploy-web: build-web
+	aws s3 sync build/ s3://$(WEB_BUCKET)/
+
 deploy: deploy-infra deploy-web
 
 buildimports: $(BUILD_DIR)
-	@$(MAKE) -C $(CFN_SRC_DIR) buildimports
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
 
 import: $(BUILD_DIR) buildimports
-	@$(MAKE) -C $(CFN_SRC_DIR) import
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
 
 replication:
 	@$(MAKE) -C cfn/replication deploy
