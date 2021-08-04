@@ -21,8 +21,7 @@
             "jzxhuang/http-extras": "2.1.0",
             "pablohirafuji/elm-qrcode": "4.0.1",
             "rtfeldman/elm-validate": "4.0.1",
-            "rundis/elm-bootstrap": "5.2.0",
-            "toastal/mailto": "5.0.0"
+            "rundis/elm-bootstrap": "5.2.0"
         },
         "indirect": {
             "avh4/elm-color": "1.0.0",

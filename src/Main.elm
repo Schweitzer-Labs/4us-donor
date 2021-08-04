@@ -24,8 +24,7 @@ import Html.Events exposing (onClick)
 import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
 import Json.Decode as Decode
-import Json.Encode as Encode exposing (Value, encode)
-import Mailto
+import Json.Encode as Encode exposing (Value)
 import OrgOrInd
 import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
@@ -365,10 +364,10 @@ provideDonorInfoView model =
         formRows =
             case model.maybeOrgOrInd of
                 Just OrgOrInd.Org ->
-                    orgRows model ++ piiRows model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
+                    orgRows model ++ piiRows model ++ attestationRow model ++ [ submitDonorButtonRow model.attestation ]
 
                 Just OrgOrInd.Ind ->
-                    piiRows model ++ employmentRows model ++ familyRow model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
+                    piiRows model ++ employmentRows model ++ familyRow model ++ attestationRow model ++ [ submitDonorButtonRow model.attestation ]
 
                 Nothing ->
                     []
@@ -794,12 +793,6 @@ donateButton model =
     submitButton SubmitPaymentInfo "Donate!" model.submitting (model.submitting == False)
 
 
-sendMessageButton : Model -> Html Msg
-sendMessageButton model =
-    a [ Mailto.toHref Copy.contributionEmailHref, class "btn btn-primary btn-block" ]
-        [ text "Send Message" ]
-
-
 isLLCDonor : Model -> Bool
 isLLCDonor model =
     Maybe.withDefault False (Maybe.map EntityType.isLLC model.maybeContributorType)
@@ -1137,9 +1130,9 @@ paymentDetailsRows model =
     ]
 
 
-attestationRow : Model -> Html Msg
+attestationRow : Model -> List (Html Msg)
 attestationRow model =
-    Grid.row
+    [ Grid.row
         [ Row.attrs [ Spacing.mt5 ] ]
         [ Grid.col
             []
@@ -1148,9 +1141,15 @@ attestationRow model =
                 , Checkbox.checked model.attestation
                 , Checkbox.onCheck UpdateAttestation
                 ]
-                Copy.attestation
+                "By making this contribution I affirm that:"
             ]
         ]
+    , Grid.row [ Row.attrs [ Spacing.mt1 ] ]
+        [ Grid.col
+            []
+            Copy.attestation
+        ]
+    ]
 
 
 sendMessageRows : Model -> List (Html Msg)
