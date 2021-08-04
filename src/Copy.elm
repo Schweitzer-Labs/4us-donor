@@ -1,7 +1,7 @@
 module Copy exposing (attestation, contributionEmailHref, currentDonationExceedsLimit, emailBody, genericError, paymentProcessingFailure, reachedMaximumContribution)
 
 import Bootstrap.Utilities.Spacing as Spacing
-import Html exposing (Html, div, h4, text)
+import Html exposing (Html, br, div, h4, text)
 import Mailto exposing (Mailto, body, subject)
 
 
@@ -49,9 +49,15 @@ contributionEmailHref =
         |> body emailBody
 
 
-attestation : String
+attestation : List (Html msg)
 attestation =
-    "By checking this box I am confirming that I am a US Citizen or Permanent Resident and at least eighteen years of age."
+    List.intersperse (br [] []) <|
+        List.map (\n -> div [ Spacing.mt2, Spacing.ml2 ] [ text n ])
+            [ "1.I am at least eighteen years old."
+            , "2.This contribution is made from my own funds, and funds are not being provided to me by another person or entity for the purpose of making this contribution. "
+            , "3.I am a U.S. citizen or lawfully admitted permanent resident (i.e., green card holder)."
+            , "4.I am making this contribution with my own personal credit card and not with a corporate or business credit card or a card issued to another person. "
+            ]
 
 
 promoCopyFormatter : String -> String -> List (Html msg)

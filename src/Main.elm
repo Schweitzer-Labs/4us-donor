@@ -365,10 +365,10 @@ provideDonorInfoView model =
         formRows =
             case model.maybeOrgOrInd of
                 Just OrgOrInd.Org ->
-                    orgRows model ++ piiRows model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
+                    orgRows model ++ piiRows model ++ attestationRow model ++ [ submitDonorButtonRow model.attestation ]
 
                 Just OrgOrInd.Ind ->
-                    piiRows model ++ employmentRows model ++ familyRow model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
+                    piiRows model ++ employmentRows model ++ familyRow model ++ attestationRow model ++ [ submitDonorButtonRow model.attestation ]
 
                 Nothing ->
                     []
@@ -1137,9 +1137,9 @@ paymentDetailsRows model =
     ]
 
 
-attestationRow : Model -> Html Msg
+attestationRow : Model -> List (Html Msg)
 attestationRow model =
-    Grid.row
+    [ Grid.row
         [ Row.attrs [ Spacing.mt5 ] ]
         [ Grid.col
             []
@@ -1148,9 +1148,15 @@ attestationRow model =
                 , Checkbox.checked model.attestation
                 , Checkbox.onCheck UpdateAttestation
                 ]
-                Copy.attestation
+                "By making this contribution I affirm that:"
             ]
         ]
+    , Grid.row [ Row.attrs [ Spacing.mt1 ] ]
+        [ Grid.col
+            []
+            Copy.attestation
+        ]
+    ]
 
 
 sendMessageRows : Model -> List (Html Msg)
