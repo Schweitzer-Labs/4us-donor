@@ -1291,7 +1291,7 @@ encodeContribution model =
         , ( "lastName", Encode.string model.lastName )
         , ( "addressLine1", Encode.string model.address1 )
         , ( "city", Encode.string model.city )
-        , ( "state", Encode.string model.state )
+        , ( "state", Encode.string <| String.toUpper model.state )
         , ( "postalCode", Encode.string model.postalCode )
         , ( "entityType", Encode.string <| EntityType.toDataString <| Maybe.withDefault EntityType.llc model.maybeContributorType )
         , ( "emailAddress", Encode.string model.emailAddress )
