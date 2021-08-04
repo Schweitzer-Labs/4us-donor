@@ -24,8 +24,7 @@ import Html.Events exposing (onClick)
 import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
 import Json.Decode as Decode
-import Json.Encode as Encode exposing (Value, encode)
-import Mailto
+import Json.Encode as Encode exposing (Value)
 import OrgOrInd
 import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
@@ -792,12 +791,6 @@ submitDonorButtonRow attestation =
 donateButton : Model -> Html Msg
 donateButton model =
     submitButton SubmitPaymentInfo "Donate!" model.submitting (model.submitting == False)
-
-
-sendMessageButton : Model -> Html Msg
-sendMessageButton model =
-    a [ Mailto.toHref Copy.contributionEmailHref, class "btn btn-primary btn-block" ]
-        [ text "Send Message" ]
 
 
 isLLCDonor : Model -> Bool

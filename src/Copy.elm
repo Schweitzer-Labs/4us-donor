@@ -1,8 +1,7 @@
-module Copy exposing (attestation, contributionEmailHref, currentDonationExceedsLimit, emailBody, genericError, paymentProcessingFailure, reachedMaximumContribution)
+module Copy exposing (attestation, currentDonationExceedsLimit, genericError, paymentProcessingFailure, reachedMaximumContribution)
 
 import Bootstrap.Utilities.Spacing as Spacing
 import Html exposing (Html, br, div, h4, text)
-import Mailto exposing (Mailto, body, subject)
 
 
 genericError =
@@ -27,28 +26,6 @@ reachedMaximumContribution =
     "You have reached the maximum contribution limit for our committee. Our team will contact you regarding further contribution methods."
 
 
-arthurEmailAddress : String
-arthurEmailAddress =
-    "arthur@4us.net"
-
-
-emailSubject : String
-emailSubject =
-    "Maxed-out Arthur"
-
-
-emailBody : String
-emailBody =
-    "I’d like to donate more but I’ve reached the limit."
-
-
-contributionEmailHref : Mailto
-contributionEmailHref =
-    Mailto.mailto arthurEmailAddress
-        |> subject emailSubject
-        |> body emailBody
-
-
 attestation : List (Html msg)
 attestation =
     List.intersperse (br [] []) <|
@@ -58,14 +35,3 @@ attestation =
             , "3. I am a U.S. citizen or lawfully admitted permanent resident (i.e., green card holder)."
             , "4. I am making this contribution with my own personal credit card and not with a corporate or business credit card or a card issued to another person. "
             ]
-
-
-promoCopyFormatter : String -> String -> List (Html msg)
-promoCopyFormatter heading copy =
-    [ h4
-        [ Spacing.mt3 ]
-        [ text heading ]
-    , div
-        []
-        [ text copy ]
-    ]
