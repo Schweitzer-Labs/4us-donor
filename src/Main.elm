@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
+port module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
 
 import AmountSelector
 import AppInput exposing (inputEmail, inputNumber, inputSecure, inputText, inputToggleSecure)
@@ -40,6 +40,16 @@ import Validate exposing (Validator, fromErrors, ifBlank, ifEmptyList, ifInvalid
 
 
 
+--- PORTS
+
+
+port sendNumber : String -> Cmd msg
+
+
+port isValidNumReceiver : (Bool -> msg) -> Sub msg
+
+
+
 -- MODEL
 
 
@@ -52,6 +62,7 @@ type alias Model =
     , amountValidated : Bool
     , donorInfoValidated : Bool
     , paymentDetailsValidated : Bool
+    , phoneNumberValidated : Bool
     , errors : List String
     , submitMode : Bool
     , submitting : Bool
@@ -145,6 +156,7 @@ initModel endpoint committeeId ref amount =
     , amountValidated = False
     , donorInfoValidated = False
     , paymentDetailsValidated = False
+    , phoneNumberValidated = False
     , attestation = False
     , errors = []
     , emailAddress = ""
@@ -453,6 +465,7 @@ type Msg
     | NoOp
     | UpdatePaymentMethod String
     | ToggleCardNumberVisibility Bool
+    | RecvPhoneValidation Bool
 
 
 type FormView
@@ -641,7 +654,7 @@ update msg model =
             ( { model | ownerOwnership = str }, Cmd.none )
 
         UpdatePhoneNumber str ->
-            ( { model | phoneNumber = str }, Cmd.none )
+            ( { model | phoneNumber = str }, sendNumber model.phoneNumber )
 
         UpdateEmailAddress str ->
             ( { model | emailAddress = str }, Cmd.none )
@@ -765,15 +778,27 @@ update msg model =
         ToggleCardNumberVisibility bool ->
             ( { model | cardNumberIsVisible = bool }, Cmd.none )
 
+        RecvPhoneValidation bool ->
+            ( { model | phoneNumberValidated = bool }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    isValidNumReceiver RecvPhoneValidation
 
 
 main : Program Config Model Msg
 main =
     Browser.document
         { init = init
-        , subscriptions = \n -> Sub.none
+        , subscriptions = subscriptions
         , update = update
         , view = view
         }
