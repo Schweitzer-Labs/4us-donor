@@ -1171,7 +1171,7 @@ attestationRow model =
             [ Checkbox.checkbox
                 [ Checkbox.id "attestation"
                 , Checkbox.checked model.attestation
-                , Checkbox.onCheck UpdateAttestation
+                , Checkbox.onCheck RecvPhoneValidation
                 ]
                 Copy.attestation
             ]
