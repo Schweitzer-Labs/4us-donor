@@ -16,6 +16,8 @@ const app = Elm.Main.init({
 
 app.ports.sendNumber.subscribe((number) => {
   app.ports.isValidNumReceiver.send(verifyPhone(number).isValid)
+  console.log(number)
+  console.log(verifyPhone(number).isValid)
 })
 
 serviceWorker.unregister();

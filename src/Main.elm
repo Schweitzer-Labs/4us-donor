@@ -23,8 +23,8 @@ import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
-import Json.Decode as Decode
-import Json.Encode as Encode exposing (Value, encode)
+import Json.Decode as Decode exposing (Value, bool, decodeValue)
+import Json.Encode as Encode
 import Mailto
 import OrgOrInd
 import Owners as Owner exposing (Owner, Owners)
@@ -46,7 +46,7 @@ import Validate exposing (Validator, fromErrors, ifBlank, ifEmptyList, ifInvalid
 port sendNumber : String -> Cmd msg
 
 
-port isValidNumReceiver : (Bool -> msg) -> Sub msg
+port isValidNumReceiver : (Value -> msg) -> Sub msg
 
 
 
@@ -465,7 +465,7 @@ type Msg
     | NoOp
     | UpdatePaymentMethod String
     | ToggleCardNumberVisibility Bool
-    | RecvPhoneValidation Bool
+    | RecvPhoneValidation Value
 
 
 type FormView
@@ -654,7 +654,7 @@ update msg model =
             ( { model | ownerOwnership = str }, Cmd.none )
 
         UpdatePhoneNumber str ->
-            ( { model | phoneNumber = str }, sendNumber model.phoneNumber )
+            ( { model | phoneNumber = str }, Cmd.none )
 
         UpdateEmailAddress str ->
             ( { model | emailAddress = str }, Cmd.none )
@@ -693,7 +693,7 @@ update msg model =
             ( { model | occupation = str }, Cmd.none )
 
         UpdateAttestation bool ->
-            ( { model | attestation = bool }, Cmd.none )
+            ( { model | attestation = bool }, sendNumber model.phoneNumber )
 
         UpdatePaymentMethod str ->
             ( model, Cmd.none )
@@ -778,8 +778,13 @@ update msg model =
         ToggleCardNumberVisibility bool ->
             ( { model | cardNumberIsVisible = bool }, Cmd.none )
 
-        RecvPhoneValidation bool ->
-            ( { model | phoneNumberValidated = bool }, Cmd.none )
+        RecvPhoneValidation value ->
+            case decodeValue bool value of
+                Ok data ->
+                    ( { model | phoneNumberValidated = data }, Cmd.none )
+
+                Err error ->
+                    ( model, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -1171,7 +1176,7 @@ attestationRow model =
             [ Checkbox.checkbox
                 [ Checkbox.id "attestation"
                 , Checkbox.checked model.attestation
-                , Checkbox.onCheck RecvPhoneValidation
+                , Checkbox.onCheck UpdateAttestation
                 ]
                 Copy.attestation
             ]
@@ -1203,6 +1208,11 @@ postalCodeValidator =
     fromErrors postalCodeToErrors
 
 
+phoneNumValidator : Validator String Model
+phoneNumValidator =
+    fromErrors phoneNumToErrors
+
+
 postalCodeToErrors : Model -> List String
 postalCodeToErrors model =
     let
@@ -1219,6 +1229,15 @@ postalCodeToErrors model =
         []
 
 
+phoneNumToErrors : Model -> List String
+phoneNumToErrors model =
+    if model.phoneNumberValidated == True then
+        []
+
+    else
+        [ "Phone number is invalid" ]
+
+
 piiValidator : Validator String Model
 piiValidator =
     Validate.firstError
@@ -1230,6 +1249,7 @@ piiValidator =
         , ifBlank .state "State is missing."
         , ifBlank .postalCode "Postal Code is missing."
         , postalCodeValidator
+        , phoneNumValidator
         ]
 
 
