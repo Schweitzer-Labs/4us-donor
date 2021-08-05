@@ -1,6 +1,6 @@
 CloudFrontFirewall:
   Type: AWS::WAFv2::WebACL
-  Condition:  NonDemo
+  Condition:  Production
   Properties:
     Name: !Sub CloudFrontFirewall${Domain}${SubDomain}
     Scope: CLOUDFRONT
