@@ -654,7 +654,7 @@ update msg model =
             ( { model | ownerOwnership = str }, Cmd.none )
 
         UpdatePhoneNumber str ->
-            ( { model | phoneNumber = str }, Cmd.none )
+            ( { model | phoneNumber = str }, sendNumber str )
 
         UpdateEmailAddress str ->
             ( { model | emailAddress = str }, Cmd.none )
@@ -693,7 +693,7 @@ update msg model =
             ( { model | occupation = str }, Cmd.none )
 
         UpdateAttestation bool ->
-            ( { model | attestation = bool }, sendNumber model.phoneNumber )
+            ( { model | attestation = bool }, Cmd.none )
 
         UpdatePaymentMethod str ->
             ( model, Cmd.none )
