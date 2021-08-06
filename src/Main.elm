@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
+port module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
 
 import AmountSelector
 import AppInput exposing (inputEmail, inputNumber, inputSecure, inputText, inputToggleSecure)
@@ -23,7 +23,7 @@ import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (bool, decodeValue)
 import Json.Encode as Encode exposing (Value)
 import OrgOrInd
 import Owners as Owner exposing (Owner, Owners)
@@ -39,6 +39,16 @@ import Validate exposing (Validator, fromErrors, ifBlank, ifEmptyList, ifInvalid
 
 
 
+--- PORTS
+
+
+port sendNumber : String -> Cmd msg
+
+
+port isValidNumReceiver : (Value -> msg) -> Sub msg
+
+
+
 -- MODEL
 
 
@@ -51,6 +61,7 @@ type alias Model =
     , amountValidated : Bool
     , donorInfoValidated : Bool
     , paymentDetailsValidated : Bool
+    , phoneNumberValidated : Bool
     , errors : List String
     , submitMode : Bool
     , submitting : Bool
@@ -144,6 +155,7 @@ initModel endpoint committeeId ref amount =
     , amountValidated = False
     , donorInfoValidated = False
     , paymentDetailsValidated = False
+    , phoneNumberValidated = False
     , attestation = False
     , errors = []
     , emailAddress = ""
@@ -452,6 +464,7 @@ type Msg
     | NoOp
     | UpdatePaymentMethod String
     | ToggleCardNumberVisibility Bool
+    | RecvPhoneValidation Decode.Value
 
 
 type FormView
@@ -640,7 +653,7 @@ update msg model =
             ( { model | ownerOwnership = str }, Cmd.none )
 
         UpdatePhoneNumber str ->
-            ( { model | phoneNumber = str }, Cmd.none )
+            ( { model | phoneNumber = str }, sendNumber str )
 
         UpdateEmailAddress str ->
             ( { model | emailAddress = str }, Cmd.none )
@@ -764,15 +777,32 @@ update msg model =
         ToggleCardNumberVisibility bool ->
             ( { model | cardNumberIsVisible = bool }, Cmd.none )
 
+        RecvPhoneValidation value ->
+            case decodeValue bool value of
+                Ok data ->
+                    ( { model | phoneNumberValidated = data }, Cmd.none )
+
+                Err error ->
+                    ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    isValidNumReceiver RecvPhoneValidation
 
 
 main : Program Config Model Msg
 main =
     Browser.document
         { init = init
-        , subscriptions = \n -> Sub.none
+        , subscriptions = subscriptions
         , update = update
         , view = view
         }
@@ -1177,6 +1207,11 @@ postalCodeValidator =
     fromErrors postalCodeToErrors
 
 
+phoneNumValidator : Validator String Model
+phoneNumValidator =
+    fromErrors phoneNumToErrors
+
+
 postalCodeToErrors : Model -> List String
 postalCodeToErrors model =
     let
@@ -1193,6 +1228,15 @@ postalCodeToErrors model =
         []
 
 
+phoneNumToErrors : Model -> List String
+phoneNumToErrors model =
+    if model.phoneNumberValidated == True then
+        []
+
+    else
+        [ "Phone number is invalid" ]
+
+
 piiValidator : Validator String Model
 piiValidator =
     Validate.firstError
@@ -1204,6 +1248,7 @@ piiValidator =
         , ifBlank .state "State is missing."
         , ifBlank .postalCode "Postal Code is missing."
         , postalCodeValidator
+        , phoneNumValidator
         ]
 
 
