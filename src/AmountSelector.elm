@@ -27,7 +27,7 @@ view selectMsg currentVal submitMsg buttonVisible =
                 []
     in
     Grid.containerFluid
-        [ Spacing.pr1, Spacing.pl0 ]
+        [ Spacing.pr0, Spacing.pl0 ]
         ([ Grid.row
             [ Row.centerMd ]
             [ Grid.col
