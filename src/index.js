@@ -22,3 +22,5 @@ app.ports.sendNumber.subscribe((number) => {
 app.ports.sendEmail.subscribe((email) =>{
   app.ports.isValidEmailReceiver.send(verifyEmail(email))
 })
+
+serviceWorker.unregister()
