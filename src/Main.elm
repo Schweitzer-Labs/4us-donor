@@ -48,6 +48,12 @@ port sendNumber : String -> Cmd msg
 port isValidNumReceiver : (Value -> msg) -> Sub msg
 
 
+port sendEmail : String -> Cmd msg
+
+
+port isValidEmailReceiver : (Value -> msg) -> Sub msg
+
+
 
 -- MODEL
 
@@ -62,6 +68,7 @@ type alias Model =
     , donorInfoValidated : Bool
     , paymentDetailsValidated : Bool
     , phoneNumberValidated : Bool
+    , emailAddressValidated : Bool
     , errors : List String
     , submitMode : Bool
     , submitting : Bool
@@ -156,6 +163,7 @@ initModel endpoint committeeId ref amount =
     , donorInfoValidated = False
     , paymentDetailsValidated = False
     , phoneNumberValidated = False
+    , emailAddressValidated = False
     , attestation = False
     , errors = []
     , emailAddress = ""
@@ -464,7 +472,8 @@ type Msg
     | NoOp
     | UpdatePaymentMethod String
     | ToggleCardNumberVisibility Bool
-    | RecvPhoneValidation Decode.Value
+    | GotPhoneValidationRes Decode.Value
+    | GotEmailValidationRes Decode.Value
 
 
 type FormView
@@ -656,7 +665,7 @@ update msg model =
             ( { model | phoneNumber = str }, sendNumber str )
 
         UpdateEmailAddress str ->
-            ( { model | emailAddress = str }, Cmd.none )
+            ( { model | emailAddress = str }, sendEmail str )
 
         UpdateFirstName str ->
             ( { model | firstName = str }, Cmd.none )
@@ -777,10 +786,18 @@ update msg model =
         ToggleCardNumberVisibility bool ->
             ( { model | cardNumberIsVisible = bool }, Cmd.none )
 
-        RecvPhoneValidation value ->
+        GotPhoneValidationRes value ->
             case decodeValue bool value of
                 Ok data ->
                     ( { model | phoneNumberValidated = data }, Cmd.none )
+
+                Err error ->
+                    ( model, Cmd.none )
+
+        GotEmailValidationRes value ->
+            case decodeValue bool value of
+                Ok data ->
+                    ( { model | emailAddressValidated = data }, Cmd.none )
 
                 Err error ->
                     ( model, Cmd.none )
@@ -795,7 +812,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    isValidNumReceiver RecvPhoneValidation
+    Sub.batch [ isValidNumReceiver GotPhoneValidationRes, isValidEmailReceiver GotEmailValidationRes ]
 
 
 main : Program Config Model Msg
@@ -1212,6 +1229,11 @@ phoneNumValidator =
     fromErrors phoneNumToErrors
 
 
+emailAddressValidator : Validator String Model
+emailAddressValidator =
+    fromErrors emailAddressToErrors
+
+
 postalCodeToErrors : Model -> List String
 postalCodeToErrors model =
     let
@@ -1237,6 +1259,15 @@ phoneNumToErrors model =
         [ "Phone number is invalid" ]
 
 
+emailAddressToErrors : Model -> List String
+emailAddressToErrors model =
+    if model.emailAddressValidated == True then
+        []
+
+    else
+        [ "Email Address is invalid" ]
+
+
 piiValidator : Validator String Model
 piiValidator =
     Validate.firstError
@@ -1249,6 +1280,7 @@ piiValidator =
         , ifBlank .postalCode "Postal Code is missing."
         , postalCodeValidator
         , phoneNumValidator
+        , emailAddressValidator
         ]
 
 

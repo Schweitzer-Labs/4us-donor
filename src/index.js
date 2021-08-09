@@ -3,6 +3,7 @@ import * as serviceWorker from './serviceWorker';
 import {Elm} from "./Main.elm";
 import {elmAppId} from "./js/config";
 import {verifyPhone} from "./js/phone";
+import {verifyEmail} from "./js/email-validator";
 
 const apiEndpoint = process.env.ELM_APP_API_ENDPOINT
 
@@ -18,4 +19,8 @@ app.ports.sendNumber.subscribe((number) => {
   app.ports.isValidNumReceiver.send(verifyPhone(number).isValid)
 })
 
-serviceWorker.unregister();
+app.ports.sendEmail.subscribe((email) =>{
+  app.ports.isValidEmailReceiver.send(verifyEmail(email))
+})
+
+serviceWorker.unregister()
