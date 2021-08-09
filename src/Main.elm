@@ -472,8 +472,8 @@ type Msg
     | NoOp
     | UpdatePaymentMethod String
     | ToggleCardNumberVisibility Bool
-    | RecvPhoneValidation Decode.Value
-    | RecvEmailValidation Decode.Value
+    | GotPhoneValidationRes Decode.Value
+    | GotEmailValidationRes Decode.Value
 
 
 type FormView
@@ -786,7 +786,7 @@ update msg model =
         ToggleCardNumberVisibility bool ->
             ( { model | cardNumberIsVisible = bool }, Cmd.none )
 
-        RecvPhoneValidation value ->
+        GotPhoneValidationRes value ->
             case decodeValue bool value of
                 Ok data ->
                     ( { model | phoneNumberValidated = data }, Cmd.none )
@@ -794,7 +794,7 @@ update msg model =
                 Err error ->
                     ( model, Cmd.none )
 
-        RecvEmailValidation value ->
+        GotEmailValidationRes value ->
             case decodeValue bool value of
                 Ok data ->
                     ( { model | emailAddressValidated = data }, Cmd.none )
@@ -812,7 +812,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch [ isValidNumReceiver RecvPhoneValidation, isValidEmailReceiver RecvEmailValidation ]
+    Sub.batch [ isValidNumReceiver GotPhoneValidationRes, isValidEmailReceiver GotEmailValidationRes ]
 
 
 main : Program Config Model Msg
