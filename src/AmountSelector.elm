@@ -31,25 +31,25 @@ view selectMsg currentVal submitMsg buttonVisible =
         ([ Grid.row
             [ Row.centerMd ]
             [ Grid.col
-                [ Col.attrs [ Spacing.pr0 ], Col.md3, Col.xs6 ]
+                [ Col.md3, Col.xs6 ]
                 [ selectButton selectMsg "$10" "10" currentVal ]
             , Grid.col
-                [ Col.attrs [ Spacing.pr0 ], Col.md3, Col.xs6 ]
+                [ Col.md3, Col.xs6 ]
                 [ selectButton selectMsg "$25" "25" currentVal ]
             , Grid.col
-                [ Col.attrs [ Spacing.pr0 ], Col.md3, Col.xs6 ]
+                [ Col.md3, Col.xs6 ]
                 [ selectButton selectMsg "$50" "50" currentVal ]
             , Grid.col
-                [ Col.attrs [ Spacing.pr0 ], Col.md3, Col.xs6 ]
+                [ Col.md3, Col.xs6 ]
                 [ selectButton selectMsg "$100" "100" currentVal ]
             , Grid.col
-                [ Col.attrs [ Spacing.pr0 ], Col.md3, Col.xs6 ]
+                [ Col.md3, Col.xs6 ]
                 [ selectButton selectMsg "$150" "150" currentVal ]
             , Grid.col
-                [ Col.attrs [ Spacing.pr0 ], Col.md3, Col.xs6 ]
+                [ Col.md3, Col.xs6 ]
                 [ selectButton selectMsg "$250" "250" currentVal ]
             , Grid.col
-                [ Col.attrs [ Spacing.pr0 ], Col.md3, Col.xs6 ]
+                [ Col.md3, Col.xs6 ]
                 [ selectButton selectMsg "$1000" "1000" currentVal ]
             , Grid.col
                 [ Col.md3, Col.xs6 ]
