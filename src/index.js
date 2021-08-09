@@ -19,3 +19,6 @@ app.ports.sendNumber.subscribe((number) => {
   app.ports.isValidNumReceiver.send(verifyPhone(number).isValid)
 })
 
+app.ports.sendEmail.subscribe((email) =>{
+  app.ports.isValidEmailReceiver.send(verifyEmail(email))
+})

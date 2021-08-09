@@ -812,7 +812,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch [ isValidNumReceiver RecvPhoneValidation ]
+    Sub.batch [ isValidNumReceiver RecvPhoneValidation, isValidEmailReceiver RecvEmailValidation ]
 
 
 main : Program Config Model Msg
