@@ -71,9 +71,6 @@ build-stacks: $(BUILD_DIR)
 $(BUILD_DIR):
 	@mkdir -p $@
 
-install-build-tools:
-	npm install create-elm-app
-
 build-web: $(BUILD_DIR)
 	@npm install
 	#npm run build-css
