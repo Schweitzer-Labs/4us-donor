@@ -48,14 +48,6 @@ export WEB_BUCKET	:= $(SUBDOMAIN)-$(RUNENV).$(DOMAIN).$(TLD)-$(REGION)
 export CREPES_PARAMS	:= --region $(REGION)
 export CREPES_PARAMS	+= --subdomain $(SUBDOMAIN) --domain $(DOMAIN) --tld $(TLD) --runenv $(RUNENV) --product $(PRODUCT)
 
-COMMITTEE_DIR		:= $(PWD)/committees
-COMMITTEE_SRCS		:= $(shell find $(COMMITTEE_SRCS) -mindepth 1 -maxdepth 1 -type d)
-
-ifeq ($(COMMITTEE), )
-	COMMITTEE	:= john-safford
-endif
-COMMITTEE_DIR		:= committees/$(COMMITTEE)
-
 .PHONY: all dep build build-cfn build-web check import package deploy deploy-web clean realclean
 
 # Make targets
@@ -73,8 +65,6 @@ $(BUILD_DIR):
 check: build
 	@$(MAKE) -C $(CFN_SRC_DIR) check
 
-
-build-committees: $(COMMITTEE_SRCS)
 
 build-web: build
 	@npm install
