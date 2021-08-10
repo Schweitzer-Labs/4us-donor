@@ -1,6 +1,6 @@
 SecureHeadersFunction:
   Type: AWS::CloudFront::Function
-  Condition:  NonDemo
+  Condition:  Production
   Properties:
     AutoPublish: true
     Name: !Sub SecureHeaders-${AWS::StackName}
