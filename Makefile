@@ -7,7 +7,6 @@ ifeq ($(RUNENV), )
        export RUNENV	:= qa
 endif
 
-
 # Deduce the Domain related parameters based on the RUNENV and PRODUCT params
 ifeq ($(RUNENV), qa)
         export REGION   := us-west-2
