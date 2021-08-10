@@ -2,7 +2,9 @@ Production:
   !Equals [!Ref RunEnvironment, prod]
 QA:
   !Equals [!Ref RunEnvironment, qa]
-Dev:
-  !Equals [!Ref RunEnvironment, dev]
+Demo:
+  !Equals [!Ref RunEnvironment, demo]
 NonProduction:
   !Not [Condition: Production]
+NonDemo:
+  !Not [Condition: Demo]

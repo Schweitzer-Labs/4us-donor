@@ -7,7 +7,6 @@ ifeq ($(RUNENV), )
        export RUNENV	:= qa
 endif
 
-
 # Deduce the Domain related parameters based on the RUNENV and PRODUCT params
 ifeq ($(RUNENV), qa)
         export REGION   := us-west-2
@@ -21,16 +20,14 @@ else ifeq ($(RUNENV), demo)
         export REGION   := us-west-1
 	export DOMAIN   := 4usdemo
 	export TLD      := com
+	export SUBDOMAIN	:= donate-api
 endif
 
 export STACK		:= $(RUNENV)-$(PRODUCT)-$(SUBDOMAIN)
 
 export DATE		:= $(shell date)
-export NONCE		:= $(shell uuidgen | cut -d\- -f1)
 
 export ENDPOINT		:= https://cloudformation-fips.$(REGION).amazonaws.com
-
-export STACK_PARAMS	:= Nonce=$(NONCE)
 
 export BUILD_DIR	:= $(PWD)/.build
 export ELM_BUILD_DIR	:= $(PWD)/build
@@ -54,28 +51,10 @@ export CREPES_PARAMS	+= --subdomain $(SUBDOMAIN) --domain $(DOMAIN) --tld $(TLD)
 all: build
 
 dep:
-	@pip3 install jinja2 cfn_flip boto3
+	@pip3 install -r requirements.txt
 
-build: $(BUILD_DIR)
-	@$(MAKE) -C $(CFN_SRC_DIR) build
-
-$(BUILD_DIR):
-	@mkdir -p $@
-
-check: build
-	@$(MAKE) -C $(CFN_SRC_DIR) check
-
-
-build-web: build
-	@npm install
-	#npm run build-css
-	@npm \
-		--runenv=$(RUNENV) \
-		--subdomain=$(SUBDOMAIN) --domain=$(DOMAIN) --tld=$(TLD) \
-		run build
-
-deploy-web: build-web
-	aws s3 sync build/ s3://$(WEB_BUCKET)/
+install-build-tools:
+	@npm install create-elm-app
 
 clean:
 	@rm -f $(BUILD_DIR)/*.yml
@@ -84,17 +63,46 @@ realclean: clean
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(ELM_BUILD_DIR)
 
-package: build
-	@$(MAKE) -C $(CFN_SRC_DIR) package
+build: build-stacks build-web
 
-deploy: package
+build-stacks: $(BUILD_DIR)
+	@$(MAKE) -C $(CFN_SRC_DIR) build
+
+$(BUILD_DIR):
+	@mkdir -p $@
+
+install-build-tools:
+	npm install create-elm-app
+
+build-web: $(BUILD_DIR)
+	@npm install
+	#npm run build-css
+	@npm \
+		--runenv=$(RUNENV) \
+		--subdomain=$(SUBDOMAIN) --domain=$(DOMAIN) --tld=$(TLD) \
+		run build
+
+check: build
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
+
+package: build
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
+
+deploy-infra: package
 	@$(MAKE) -C $(CFN_SRC_DIR) deploy
 
+deploy-web: build-web
+	aws s3 sync build/ s3://$(WEB_BUCKET)/
+
+deploy: deploy-infra deploy-web
+
+deploy-cloudflare: install-build-tools build-web
+
 buildimports: $(BUILD_DIR)
-	@$(MAKE) -C $(CFN_SRC_DIR) buildimports
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
 
 import: $(BUILD_DIR) buildimports
-	@$(MAKE) -C $(CFN_SRC_DIR) import
+	@$(MAKE) -C $(CFN_SRC_DIR) $@
 
 replication:
 	@$(MAKE) -C cfn/replication deploy

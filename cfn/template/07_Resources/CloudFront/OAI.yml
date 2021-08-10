@@ -1,5 +1,6 @@
 OAI:
   Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+  Condition:  NonDemo
   Properties:
     CloudFrontOriginAccessIdentityConfig:
       Comment: !Sub Origin Access Identity for ${SubDomain}.${Domain}.${TLD}

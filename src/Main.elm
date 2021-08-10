@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
+port module Main exposing (Model, Msg(..), frameContainer, init, main, update, view)
 
 import AmountSelector
 import AppInput exposing (inputEmail, inputNumber, inputSecure, inputText, inputToggleSecure)
@@ -23,9 +23,8 @@ import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
-import Json.Decode as Decode
-import Json.Encode as Encode exposing (Value, encode)
-import Mailto
+import Json.Decode as Decode exposing (bool, decodeValue)
+import Json.Encode as Encode exposing (Value)
 import OrgOrInd
 import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
@@ -37,6 +36,22 @@ import Url
 import Url.Parser exposing ((<?>), parse, top)
 import Url.Parser.Query as Query exposing (Parser)
 import Validate exposing (Validator, fromErrors, ifBlank, ifEmptyList, ifInvalidEmail, ifNothing, validate)
+
+
+
+--- PORTS
+
+
+port sendNumber : String -> Cmd msg
+
+
+port isValidNumReceiver : (Value -> msg) -> Sub msg
+
+
+port sendEmail : String -> Cmd msg
+
+
+port isValidEmailReceiver : (Value -> msg) -> Sub msg
 
 
 
@@ -52,6 +67,8 @@ type alias Model =
     , amountValidated : Bool
     , donorInfoValidated : Bool
     , paymentDetailsValidated : Bool
+    , phoneNumberValidated : Bool
+    , emailAddressValidated : Bool
     , errors : List String
     , submitMode : Bool
     , submitting : Bool
@@ -145,6 +162,8 @@ initModel endpoint committeeId ref amount =
     , amountValidated = False
     , donorInfoValidated = False
     , paymentDetailsValidated = False
+    , phoneNumberValidated = False
+    , emailAddressValidated = False
     , attestation = False
     , errors = []
     , emailAddress = ""
@@ -192,7 +211,7 @@ type DisplayState
     | Closed
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     CommitteePage.view model.committeeId (stateView model)
 
@@ -365,10 +384,10 @@ provideDonorInfoView model =
         formRows =
             case model.maybeOrgOrInd of
                 Just OrgOrInd.Org ->
-                    orgRows model ++ piiRows model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
+                    orgRows model ++ piiRows model ++ attestationRow model ++ [ submitDonorButtonRow model.attestation ]
 
                 Just OrgOrInd.Ind ->
-                    piiRows model ++ employmentRows model ++ familyRow model ++ [ attestationRow model, submitDonorButtonRow model.attestation ]
+                    piiRows model ++ employmentRows model ++ familyRow model ++ attestationRow model ++ [ submitDonorButtonRow model.attestation ]
 
                 Nothing ->
                     []
@@ -453,6 +472,8 @@ type Msg
     | NoOp
     | UpdatePaymentMethod String
     | ToggleCardNumberVisibility Bool
+    | GotPhoneValidationRes Decode.Value
+    | GotEmailValidationRes Decode.Value
 
 
 type FormView
@@ -641,10 +662,10 @@ update msg model =
             ( { model | ownerOwnership = str }, Cmd.none )
 
         UpdatePhoneNumber str ->
-            ( { model | phoneNumber = str }, Cmd.none )
+            ( { model | phoneNumber = str }, sendNumber str )
 
         UpdateEmailAddress str ->
-            ( { model | emailAddress = str }, Cmd.none )
+            ( { model | emailAddress = str }, sendEmail str )
 
         UpdateFirstName str ->
             ( { model | firstName = str }, Cmd.none )
@@ -765,15 +786,40 @@ update msg model =
         ToggleCardNumberVisibility bool ->
             ( { model | cardNumberIsVisible = bool }, Cmd.none )
 
+        GotPhoneValidationRes value ->
+            case decodeValue bool value of
+                Ok data ->
+                    ( { model | phoneNumberValidated = data }, Cmd.none )
+
+                Err error ->
+                    ( model, Cmd.none )
+
+        GotEmailValidationRes value ->
+            case decodeValue bool value of
+                Ok data ->
+                    ( { model | emailAddressValidated = data }, Cmd.none )
+
+                Err error ->
+                    ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
 
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.batch [ isValidNumReceiver GotPhoneValidationRes, isValidEmailReceiver GotEmailValidationRes ]
+
+
 main : Program Config Model Msg
 main =
-    Browser.element
+    Browser.document
         { init = init
-        , subscriptions = \n -> Sub.none
+        , subscriptions = subscriptions
         , update = update
         , view = view
         }
@@ -792,12 +838,6 @@ submitDonorButtonRow attestation =
 donateButton : Model -> Html Msg
 donateButton model =
     submitButton SubmitPaymentInfo "Donate!" model.submitting (model.submitting == False)
-
-
-sendMessageButton : Model -> Html Msg
-sendMessageButton model =
-    a [ Mailto.toHref Copy.contributionEmailHref, class "btn btn-primary btn-block" ]
-        [ text "Send Message" ]
 
 
 isLLCDonor : Model -> Bool
@@ -1137,9 +1177,9 @@ paymentDetailsRows model =
     ]
 
 
-attestationRow : Model -> Html Msg
+attestationRow : Model -> List (Html Msg)
 attestationRow model =
-    Grid.row
+    [ Grid.row
         [ Row.attrs [ Spacing.mt5 ] ]
         [ Grid.col
             []
@@ -1148,9 +1188,15 @@ attestationRow model =
                 , Checkbox.checked model.attestation
                 , Checkbox.onCheck UpdateAttestation
                 ]
-                Copy.attestation
+                "By making this contribution I affirm that:"
             ]
         ]
+    , Grid.row [ Row.attrs [ Spacing.mt1 ] ]
+        [ Grid.col
+            []
+            Copy.attestation
+        ]
+    ]
 
 
 sendMessageRows : Model -> List (Html Msg)
@@ -1178,6 +1224,16 @@ postalCodeValidator =
     fromErrors postalCodeToErrors
 
 
+phoneNumValidator : Validator String Model
+phoneNumValidator =
+    fromErrors phoneNumToErrors
+
+
+emailAddressValidator : Validator String Model
+emailAddressValidator =
+    fromErrors emailAddressToErrors
+
+
 postalCodeToErrors : Model -> List String
 postalCodeToErrors model =
     let
@@ -1194,6 +1250,24 @@ postalCodeToErrors model =
         []
 
 
+phoneNumToErrors : Model -> List String
+phoneNumToErrors model =
+    if model.phoneNumberValidated == True then
+        []
+
+    else
+        [ "Phone number is invalid" ]
+
+
+emailAddressToErrors : Model -> List String
+emailAddressToErrors model =
+    if model.emailAddressValidated == True then
+        []
+
+    else
+        [ "Email Address is invalid" ]
+
+
 piiValidator : Validator String Model
 piiValidator =
     Validate.firstError
@@ -1205,6 +1279,8 @@ piiValidator =
         , ifBlank .state "State is missing."
         , ifBlank .postalCode "Postal Code is missing."
         , postalCodeValidator
+        , phoneNumValidator
+        , emailAddressValidator
         ]
 
 
@@ -1291,7 +1367,7 @@ encodeContribution model =
         , ( "lastName", Encode.string model.lastName )
         , ( "addressLine1", Encode.string model.address1 )
         , ( "city", Encode.string model.city )
-        , ( "state", Encode.string model.state )
+        , ( "state", Encode.string <| String.toUpper model.state )
         , ( "postalCode", Encode.string model.postalCode )
         , ( "entityType", Encode.string <| EntityType.toDataString <| Maybe.withDefault EntityType.llc model.maybeContributorType )
         , ( "emailAddress", Encode.string model.emailAddress )
