@@ -81,6 +81,9 @@ $(BUILD_DIR):
 
 build-committees: $(COMMITTEE_SRCS)
 
+install-build-tools:
+	npm install create-elm-app
+
 build-web: $(BUILD_DIR)
 	@npm install
 	#npm run build-css
@@ -102,6 +105,8 @@ deploy-web: build-web
 	aws s3 sync build/ s3://$(WEB_BUCKET)/
 
 deploy: deploy-infra deploy-web
+
+deploy-cloudflare: install-build-tools build-web
 
 buildimports: $(BUILD_DIR)
 	@$(MAKE) -C $(CFN_SRC_DIR) $@
