@@ -1,6 +1,6 @@
 RecordSet:
   Type: AWS::Route53::RecordSet
-  Condition:  NonDemo
+  Condition:  Production
   Properties:
     Name: !Sub ${SubDomain}.${Domain}.${TLD}
     Type: A

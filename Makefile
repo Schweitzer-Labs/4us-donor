@@ -7,7 +7,6 @@ ifeq ($(RUNENV), )
        export RUNENV	:= qa
 endif
 
-
 # Deduce the Domain related parameters based on the RUNENV and PRODUCT params
 ifeq ($(RUNENV), qa)
         export REGION   := us-west-2
@@ -46,14 +45,6 @@ export WEB_BUCKET	:= $(SUBDOMAIN)-$(RUNENV).$(DOMAIN).$(TLD)-$(REGION)
 export CREPES_PARAMS	:= --region $(REGION)
 export CREPES_PARAMS	+= --subdomain $(SUBDOMAIN) --domain $(DOMAIN) --tld $(TLD) --runenv $(RUNENV) --product $(PRODUCT)
 
-COMMITTEE_DIR		:= $(PWD)/committees
-COMMITTEE_SRCS		:= $(shell find $(COMMITTEE_SRCS) -mindepth 1 -maxdepth 1 -type d)
-
-ifeq ($(COMMITTEE), )
-	COMMITTEE	:= john-safford
-endif
-COMMITTEE_DIR		:= committees/$(COMMITTEE)
-
 .PHONY: all dep build build-cfn build-web check import package deploy deploy-web clean realclean
 
 # Make targets
@@ -80,8 +71,6 @@ build-stacks: $(BUILD_DIR)
 $(BUILD_DIR):
 	@mkdir -p $@
 
-build-committees: $(COMMITTEE_SRCS)
-
 build-web: $(BUILD_DIR)
 	@npm install
 	#npm run build-css
@@ -103,6 +92,8 @@ deploy-web: build-web
 	aws s3 sync build/ s3://$(WEB_BUCKET)/
 
 deploy: deploy-infra deploy-web
+
+deploy-cloudflare: install-build-tools build-web
 
 buildimports: $(BUILD_DIR)
 	@$(MAKE) -C $(CFN_SRC_DIR) $@
