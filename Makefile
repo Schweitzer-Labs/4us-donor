@@ -45,6 +45,8 @@ export WEB_BUCKET	:= $(SUBDOMAIN)-$(RUNENV).$(DOMAIN).$(TLD)-$(REGION)
 export CREPES_PARAMS	:= --region $(REGION)
 export CREPES_PARAMS	+= --subdomain $(SUBDOMAIN) --domain $(DOMAIN) --tld $(TLD) --runenv $(RUNENV) --product $(PRODUCT)
 
+API_ENDPOINT		:= https://$(SUBDOMAIN)-api.$(DOMAIN).$(TLD)/api/platform/contribute
+
 .PHONY: all dep build build-cfn build-web check import package deploy deploy-web clean realclean
 
 # Make targets
@@ -77,6 +79,7 @@ build-web: $(BUILD_DIR)
 	@npm \
 		--runenv=$(RUNENV) \
 		--subdomain=$(SUBDOMAIN) --domain=$(DOMAIN) --tld=$(TLD) \
+		--apiendpoint=$(API_ENDPOINT) \
 		run build
 
 check: build
