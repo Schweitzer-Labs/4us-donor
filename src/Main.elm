@@ -358,10 +358,10 @@ donorInfoTitle model =
     case model.maybeOrgOrInd of
         Just OrgOrInd.Org ->
             if String.length model.entityName > 0 then
-                titleWithData "Donor Info" model.entityName
+                titleWithData "My Info" model.entityName
 
             else
-                text "Donor Info"
+                text "My Info"
 
         Just OrgOrInd.Ind ->
             let
@@ -369,13 +369,13 @@ donorInfoTitle model =
                     model.firstName ++ " " ++ model.lastName
             in
             if String.length fullName > 1 then
-                titleWithData "Donor Info" fullName
+                titleWithData "My Info" fullName
 
             else
-                text "Donor Info"
+                text "My Info"
 
         Nothing ->
-            text "Donor Info"
+            text "My Info"
 
 
 provideDonorInfoView : Model -> Html Msg
@@ -1032,7 +1032,7 @@ familyRow model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ div [] [ text "Are you a family member* of the candidate who will receive this contribution?" ]
+            [ div [] [ text "Am I a family member* of the candidate who will receive this contribution?" ]
             , div [ Spacing.pl3, Spacing.pr3, Spacing.pt1 ] [ text "*Defined as the candidate's child, parent, grandparent, brother, sister, and the spouses of any such persons" ]
             ]
         ]
@@ -1054,7 +1054,7 @@ orgOrIndRow model =
                 [ Row.attrs [ Spacing.mt2 ] ]
                 [ Grid.col
                     []
-                    [ text "Will you be donating as an individual or on behalf of an organization?" ]
+                    [ text "Will I be donating as an individual or on behalf of an organization?" ]
                 ]
             , Grid.row
                 [ Row.attrs [ Spacing.mt3 ] ]
@@ -1091,7 +1091,7 @@ employmentStatusRows model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ text "What is your employment status?" ]
+            [ text "Employment status:" ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt3 ] ]
