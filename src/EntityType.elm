@@ -2,7 +2,8 @@ module EntityType exposing (Model(..), candidateRelationshipRadioList, isLLC, ll
 
 import Bootstrap.Form.Radio as Radio
 import Bootstrap.Form.Select as Select exposing (Item)
-import Html exposing (Html, text)
+import Bootstrap.Utilities.Spacing as Spacing
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, selected, value)
 
 
@@ -199,7 +200,11 @@ candidateRelationshipRadioList msg currentValue =
             , Radio.onClick (msg Family)
             , Radio.checked (currentValue == Just Family)
             ]
-            (Radio.label [] [ text "Family member of the candidate", text "a. Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ])
+            (Radio.label []
+                [ text "Family member of the candidate"
+                , div [ Spacing.mt1, Spacing.ml2 ] [ text "a. Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ]
+                ]
+            )
         , Radio.createCustom
             [ Radio.id "ind"
             , Radio.inline
