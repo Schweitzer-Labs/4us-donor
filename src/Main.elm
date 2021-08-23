@@ -1252,7 +1252,10 @@ postalCodeToErrors model =
 
 phoneNumToErrors : Model -> List String
 phoneNumToErrors model =
-    if model.phoneNumberValidated == True then
+    if String.length model.phoneNumber == 0 then
+        []
+
+    else if model.phoneNumberValidated then
         []
 
     else
