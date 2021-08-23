@@ -1032,8 +1032,7 @@ familyRow model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ div [] [ text "Am I a family member* of the candidate who will receive this contribution?" ]
-            , div [ Spacing.pl3, Spacing.pr3, Spacing.pt1 ] [ text "*Defined as the candidate's child, parent, grandparent, brother, sister, and the spouses of any such persons" ]
+            [ div [] [ text "Select your relation to the candidate:" ]
             ]
         ]
     , Grid.row
@@ -1041,7 +1040,7 @@ familyRow model =
         [ Grid.col
             []
           <|
-            EntityType.familyRadioList UpdateFamilyOrIndividual model.maybeContributorType
+            EntityType.candidateRelationshipRadioList UpdateFamilyOrIndividual model.maybeContributorType
         ]
     ]
 

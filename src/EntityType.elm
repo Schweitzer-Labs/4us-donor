@@ -1,8 +1,9 @@
-module EntityType exposing (Model(..), familyRadioList, isLLC, llc, orgView, toDataString, toDisplayString)
+module EntityType exposing (Model(..), candidateRelationshipRadioList, isLLC, llc, orgView, toDataString, toDisplayString)
 
 import Bootstrap.Form.Radio as Radio
 import Bootstrap.Form.Select as Select exposing (Item)
-import Html exposing (Html, text)
+import Bootstrap.Utilities.Spacing as Spacing
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, selected, value)
 
 
@@ -11,6 +12,7 @@ type Model
     | Individual
     | SoleProprietorship
     | PartnershipIncludingLLPs
+    | Candidate
     | Corporation
     | Committee
     | Union
@@ -60,6 +62,9 @@ toDataString contributorType =
         Other ->
             "Oth"
 
+        Candidate ->
+            "Can"
+
 
 fromString : String -> Maybe Model
 fromString str =
@@ -97,6 +102,9 @@ fromString str =
         "Plc" ->
             Just PoliticalCommittee
 
+        "Can" ->
+            Just Candidate
+
         "Oth" ->
             Just Other
 
@@ -124,6 +132,9 @@ toDisplayString contributorType =
 
         Committee ->
             "Committee"
+
+        Candidate ->
+            "Candidate"
 
         Union ->
             "Union"
@@ -173,23 +184,34 @@ orgSelect contributorType currentValue =
         [ text <| toDisplayString contributorType ]
 
 
-familyRadioList : (Model -> msg) -> Maybe Model -> List (Html msg)
-familyRadioList msg currentValue =
-    Radio.radioList "familyOfCandidate"
+candidateRelationshipRadioList : (Model -> msg) -> Maybe Model -> List (Html msg)
+candidateRelationshipRadioList msg currentValue =
+    Radio.radioList "candidateRelationship"
         [ Radio.createCustom
-            [ Radio.id "yes"
+            [ Radio.id "can"
+            , Radio.inline
+            , Radio.onClick (msg Candidate)
+            , Radio.checked (currentValue == Just Candidate)
+            ]
+            "The candidate or spouse of the candidate"
+        , Radio.createCustomAdvanced
+            [ Radio.id "fam"
             , Radio.inline
             , Radio.onClick (msg Family)
             , Radio.checked (currentValue == Just Family)
             ]
-            "Yes"
+            (Radio.label []
+                [ text "Family member of the candidate"
+                , div [ Spacing.mt1, Spacing.ml2 ] [ text "a. Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ]
+                ]
+            )
         , Radio.createCustom
-            [ Radio.id "no"
+            [ Radio.id "ind"
             , Radio.inline
             , Radio.onClick (msg Individual)
             , Radio.checked (currentValue == Just Individual)
             ]
-            "No"
+            "N/A"
         ]
 
 
