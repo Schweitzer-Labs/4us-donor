@@ -14,18 +14,23 @@ import Html.Attributes exposing (class)
 
 view : String -> Html msg -> { title : String, body : List (Html msg) }
 view committeeId form =
-    case committeeId of
-        "john-safford" ->
-            { title = "John Safford Committee", body = committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot form }
+    -- @Todo formulate less hacky approach to catch demo committees
+    if String.length committeeId >= 20 then
+        { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
 
-        "ian-cain" ->
-            { title = "Ian Cain Committee", body = committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form }
+    else
+        case committeeId of
+            "john-safford" ->
+                { title = "John Safford Committee", body = committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot form }
 
-        "will-schweitzer" ->
-            { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
+            "ian-cain" ->
+                { title = "Ian Cain Committee", body = committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form }
 
-        _ ->
-            { title = "Committee not found", body = [ div [] [ h1 [ class "text-center", Spacing.mt5 ] [ text "Committee not found" ] ] ] }
+            "will-schweitzer" ->
+                { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
+
+            _ ->
+                { title = "Committee not found", body = [ div [] [ h1 [ class "text-center", Spacing.mt5 ] [ text "Committee not found" ] ] ] }
 
 
 committeePage : Html msg -> Html msg -> Image -> Html msg -> List (Html msg)
