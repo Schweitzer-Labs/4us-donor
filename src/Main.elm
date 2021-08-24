@@ -18,7 +18,7 @@ import Content.IanCain as IanCain
 import Copy
 import EmploymentStatus exposing (EmploymentStatus)
 import EntityType
-import Html exposing (..)
+import Html exposing (Attribute, Html, div, h3, h4, img, span, text)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Http exposing (Error(..), Expect, jsonBody, post)
@@ -33,7 +33,7 @@ import State
 import SubmitButton exposing (submitButton)
 import Task
 import Url
-import Url.Parser exposing ((<?>), parse, top)
+import Url.Parser exposing ((</>), (<?>), parse, s, string, top)
 import Url.Parser.Query as Query exposing (Parser)
 import Validate exposing (Validator, fromErrors, ifBlank, ifEmptyList, ifInvalidEmail, ifNothing, validate)
 
@@ -111,7 +111,7 @@ type alias Model =
 
 
 committeeIdParser =
-    top <?> Query.string "committeeId"
+    s "committee" </> string
 
 
 refParser =
@@ -134,7 +134,7 @@ init { host, apiEndpoint } =
         Just url ->
             let
                 committeeId =
-                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse committeeIdParser url
+                    Maybe.withDefault "" <| parse committeeIdParser url
 
                 ref =
                     Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse refParser url

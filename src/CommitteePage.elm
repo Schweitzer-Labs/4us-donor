@@ -21,8 +21,11 @@ view committeeId form =
         "ian-cain" ->
             { title = "Ian Cain Committee", body = committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form }
 
-        _ ->
+        "Will Schweitzer" ->
             { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
+
+        _ ->
+            { title = "Committee not found", body = [ div [] [ h1 [ class "text-center", Spacing.mt5 ] [ text "Committee not found" ] ] ] }
 
 
 committeePage : Html msg -> Html msg -> Image -> Html msg -> List (Html msg)
