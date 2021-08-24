@@ -21,7 +21,7 @@ view committeeId form =
         "ian-cain" ->
             { title = "Ian Cain Committee", body = committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form }
 
-        "Will Schweitzer" ->
+        "will-schweitzer" ->
             { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
 
         _ ->
