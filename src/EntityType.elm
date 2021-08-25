@@ -201,8 +201,8 @@ candidateRelationshipRadioList msg currentValue =
             , Radio.checked (currentValue == Just Family)
             ]
             (Radio.label []
-                [ text "Family member of the candidate"
-                , div [ Spacing.mt1, Spacing.ml2 ] [ text "a. Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ]
+                [ text "Family member* of the candidate"
+                , div [ Spacing.mt1, Spacing.ml2 ] [ text "*Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ]
                 ]
             )
         , Radio.createCustom
