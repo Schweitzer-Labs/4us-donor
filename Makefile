@@ -20,7 +20,6 @@ else ifeq ($(RUNENV), demo)
         export REGION   := us-west-1
 	export DOMAIN   := 4usdemo
 	export TLD      := com
-	export SUBDOMAIN	:= donate-api
 endif
 
 export STACK		:= $(RUNENV)-$(PRODUCT)-$(SUBDOMAIN)
