@@ -22,7 +22,7 @@ export BUILD_DIR	:= $(PWD)/build
 
 API_ENDPOINT	:= https://$(SUBDOMAIN)-api.$(DOMAIN).$(TLD)/api/platform/contribute
 
-.PHONY: all dep build deploy clean realclean
+.PHONY: all dep build clean realclean
 
 # Make targets
 all: build
@@ -47,5 +47,3 @@ build: $(BUILD_DIR) dep
 		--subdomain=$(SUBDOMAIN) --domain=$(DOMAIN) --tld=$(TLD) \
 		--apiendpoint=$(API_ENDPOINT) \
 		run build
-
-deploy: build
