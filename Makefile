@@ -20,7 +20,6 @@ else ifeq ($(RUNENV), demo)
         export REGION   := us-west-1
 	export DOMAIN   := 4usdemo
 	export TLD      := com
-	export SUBDOMAIN	:= donate-api
 endif
 
 export STACK		:= $(RUNENV)-$(PRODUCT)-$(SUBDOMAIN)
@@ -40,12 +39,11 @@ CFN_SRC_DIR		:= $(PWD)/cfn/template
 SRCS			:= $(shell find $(CFN_SRC_DIR)/0* -name '*.yml' -o -name '*.txt')
 
 export CFN_BUCKET	:= $(PRODUCT)-cfn-templates-$(REGION)
-export WEB_BUCKET	:= $(SUBDOMAIN)-$(RUNENV).$(DOMAIN).$(TLD)-$(REGION)
 
 export CREPES_PARAMS	:= --region $(REGION)
 export CREPES_PARAMS	+= --subdomain $(SUBDOMAIN) --domain $(DOMAIN) --tld $(TLD) --runenv $(RUNENV) --product $(PRODUCT)
 
-API_ENDPOINT		:= https://$(SUBDOMAIN)-api.$(DOMAIN).$(TLD)/api/platform/contribute
+API_ENDPOINT	:= https://$(SUBDOMAIN)-api.$(DOMAIN).$(TLD)/api/platform/contribute
 
 .PHONY: all dep build build-cfn build-web check import package deploy deploy-web clean realclean
 
@@ -91,10 +89,7 @@ package: build
 deploy-infra: package
 	@$(MAKE) -C $(CFN_SRC_DIR) deploy
 
-deploy-web: build-web
-	aws s3 sync build/ s3://$(WEB_BUCKET)/
-
-deploy: deploy-infra deploy-web
+deploy: deploy-infra
 
 deploy-cloudflare: install-build-tools build-web
 
