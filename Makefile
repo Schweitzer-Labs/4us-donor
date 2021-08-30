@@ -22,7 +22,7 @@ export BUILD_DIR	:= $(PWD)/build
 
 API_ENDPOINT	:= https://$(SUBDOMAIN)-api.$(DOMAIN).$(TLD)/api/platform/contribute
 
-.PHONY: all dep build clean realclean
+.PHONY: all dep build clean
 
 # Make targets
 all: build
@@ -31,9 +31,6 @@ dep:
 	@npm install create-elm-app
 
 clean:
-	@rm -f $(BUILD_DIR)/*
-
-realclean: clean
 	@rm -rf $(BUILD_DIR)
 
 $(BUILD_DIR):
