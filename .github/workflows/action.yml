@@ -57,7 +57,7 @@ jobs:
       - name: Assemble and Deploy CloudFormation Stacks
         id: deploy-cloudformation-stack-to-aws
         run: |
-          make RUNENV=${{ env.RUNENV }} -f Makefile.prod deploy-infra
+          make RUNENV=${{ env.RUNENV }} -f Makefile.prod deploy
       - name: Deploy WebApp assets to the S3 Bucket
         id: deploy-webapp-assets-to-s3-bucket
         run: |
