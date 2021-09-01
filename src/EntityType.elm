@@ -188,6 +188,13 @@ candidateRelationshipRadioList : (Model -> msg) -> Maybe Model -> List (Html msg
 candidateRelationshipRadioList msg currentValue =
     Radio.radioList "candidateRelationship"
         [ Radio.createCustom
+            [ Radio.id "ind"
+            , Radio.inline
+            , Radio.onClick (msg Individual)
+            , Radio.checked (currentValue == Just Individual)
+            ]
+            "Not Related"
+        , Radio.createCustom
             [ Radio.id "can"
             , Radio.inline
             , Radio.onClick (msg Candidate)
@@ -205,13 +212,6 @@ candidateRelationshipRadioList msg currentValue =
                 , div [ Spacing.mt1, Spacing.ml2 ] [ text "*Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ]
                 ]
             )
-        , Radio.createCustom
-            [ Radio.id "ind"
-            , Radio.inline
-            , Radio.onClick (msg Individual)
-            , Radio.checked (currentValue == Just Individual)
-            ]
-            "N/A"
         ]
 
 
