@@ -133,14 +133,17 @@ init { host, apiEndpoint } =
     case Url.fromString host of
         Just url ->
             let
+                normalizedUrl =
+                    { url | path = "" }
+
                 committeeId =
                     Maybe.withDefault "" <| parse committeeIdParser url
 
                 ref =
-                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse refParser url
+                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse refParser normalizedUrl
 
                 amount =
-                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse amountParser url
+                    Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse amountParser normalizedUrl
             in
             ( initModel apiEndpoint committeeId ref amount, Cmd.none )
 
