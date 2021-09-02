@@ -6,6 +6,6 @@ RecordSet:
     AliasTarget:
       # This hostedzoneid is universal for alias records to cloudfront
       HostedZoneId: Z2FDTNDATAQYW2
-      DNSName: !Sub ${CDNDistribution.DomainName}
+      DNSName: !Sub ${Distribution.DomainName}
       EvaluateTargetHealth: false
     HostedZoneId: !Ref HostedZone
