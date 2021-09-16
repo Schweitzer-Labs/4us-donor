@@ -30,6 +30,7 @@ import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
 import Settings
 import State
+import String.Extra
 import SubmitButton exposing (submitButton)
 import Task
 import Url
@@ -743,6 +744,14 @@ update msg model =
                             ( { model | errors = [ Copy.genericError ] }, Cmd.none )
 
                         Http.Detailed.BadStatus metadata body ->
+                            let
+                                errorMsg =
+                                    String.slice 2 -2 <|
+                                        String.filter isValidChar <|
+                                            String.Extra.rightOf "message" <|
+                                                String.Extra.leftOf "remaining" <|
+                                                    body
+                            in
                             case metadata.statusCode of
                                 422 ->
                                     ( { model | errors = [ Copy.paymentProcessingFailure ], submitting = False }, Cmd.none )
@@ -754,7 +763,7 @@ update msg model =
                                     in
                                     case remainingRes of
                                         Err _ ->
-                                            ( { model | errors = [ Copy.genericError ], submitting = False }, Cmd.none )
+                                            ( { model | errors = [ errorMsg ], submitting = False }, Cmd.none )
 
                                         Ok remaining ->
                                             if remaining > 0 then
@@ -1419,3 +1428,7 @@ postContribution model =
         , expect =
             Http.Detailed.expectString GotAPIResponseContribute
         }
+
+
+isValidChar char =
+    char /= ':' && char /= ',' && char /= '"'
