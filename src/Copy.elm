@@ -5,7 +5,7 @@ import Html exposing (Html, br, div, h4, text)
 
 
 genericError =
-    "Unexpected failure,please email us at support@4US.net. Our team is ready to help."
+    "Unexpected failure, please email us at support@4US.net. Our team is ready to help."
 
 
 paymentProcessingFailure =
