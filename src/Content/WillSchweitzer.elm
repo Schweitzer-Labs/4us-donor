@@ -25,7 +25,7 @@ promoHeading =
 
 
 firstHeading =
-    "Capable"
+    "Let's"
 
 
 firstCopy =
@@ -33,7 +33,7 @@ firstCopy =
 
 
 secondHeading =
-    "Responsible"
+    "Go"
 
 
 secondCopy =
@@ -41,7 +41,7 @@ secondCopy =
 
 
 thirdHeading =
-    "Considerate"
+    "Buffalo"
 
 
 thirdCopy =
