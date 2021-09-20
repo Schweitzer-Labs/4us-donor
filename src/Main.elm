@@ -30,6 +30,7 @@ import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
 import Settings
 import State
+import String.Extra
 import SubmitButton exposing (submitButton)
 import Task
 import Url
@@ -743,6 +744,15 @@ update msg model =
                             ( { model | errors = [ Copy.genericError ] }, Cmd.none )
 
                         Http.Detailed.BadStatus metadata body ->
+                            let
+                                errorMsg =
+                                    case Decode.decodeString (Decode.field "message" Decode.string) body of
+                                        Ok value ->
+                                            value
+
+                                        Err err ->
+                                            Copy.genericError
+                            in
                             case metadata.statusCode of
                                 422 ->
                                     ( { model | errors = [ Copy.paymentProcessingFailure ], submitting = False }, Cmd.none )
@@ -754,7 +764,7 @@ update msg model =
                                     in
                                     case remainingRes of
                                         Err _ ->
-                                            ( { model | errors = [ Copy.genericError ], submitting = False }, Cmd.none )
+                                            ( { model | errors = [ errorMsg ], submitting = False }, Cmd.none )
 
                                         Ok remaining ->
                                             if remaining > 0 then
@@ -772,7 +782,7 @@ update msg model =
 
                                             else
                                                 ( { model
-                                                    | errors = []
+                                                    | errors = [ errorMsg ]
                                                     , submitting = False
                                                     , remaining = Just remaining
                                                     , submitMode = True
