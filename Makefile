@@ -29,6 +29,7 @@ all: build
 
 dep:
 	@npm install create-elm-app
+	@npm install
 
 clean:
 	@rm -rf $(BUILD_DIR)
@@ -37,7 +38,6 @@ $(BUILD_DIR):
 	@mkdir -p $@
 
 build: $(BUILD_DIR) dep
-	@npm install
 	#npm run build-css
 	@npm \
 		--runenv=$(RUNENV) \
