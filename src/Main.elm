@@ -746,11 +746,12 @@ update msg model =
                         Http.Detailed.BadStatus metadata body ->
                             let
                                 errorMsg =
-                                    String.slice 2 -2 <|
-                                        String.filter isValidChar <|
-                                            String.Extra.rightOf "message" <|
-                                                String.Extra.leftOf "remaining" <|
-                                                    body
+                                    case Decode.decodeString (Decode.field "message" Decode.string) body of
+                                        Ok value ->
+                                            value
+
+                                        Err err ->
+                                            Copy.genericError
                             in
                             case metadata.statusCode of
                                 422 ->
@@ -781,7 +782,7 @@ update msg model =
 
                                             else
                                                 ( { model
-                                                    | errors = []
+                                                    | errors = [ errorMsg ]
                                                     , submitting = False
                                                     , remaining = Just remaining
                                                     , submitMode = True
@@ -1428,7 +1429,3 @@ postContribution model =
         , expect =
             Http.Detailed.expectString GotAPIResponseContribute
         }
-
-
-isValidChar char =
-    char /= ':' && char /= ',' && char /= '"'
