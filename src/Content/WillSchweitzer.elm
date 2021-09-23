@@ -2,7 +2,7 @@ module Content.WillSchweitzer exposing (arthurEmailAddress, emailBody, emailSubj
 
 import Bootstrap.Utilities.Spacing as Spacing
 import Content.Generic exposing (promoCopyFormatter)
-import Html exposing (Html, div, h4, text)
+import Html exposing (Html, div, h4, li, text)
 
 
 arthurEmailAddress : String
@@ -22,7 +22,7 @@ emailBody =
 
 promoHeading : Html msg
 promoHeading =
-    text "Josh Allen for Governor"
+    text "Shana Harmongoff for Senator"
 
 
 firstHeading =
@@ -65,16 +65,21 @@ promoContent =
     div []
         [ h4
             [ Spacing.mt3 ]
-            [ text "Fight, Wyoming, Fight" ]
+            [ text "Your Neighbor, Your Voice" ]
+        , div [] [ text "As your neighbor and your voice in the New York State Senate Shana Harmongoff will..." ]
         , div
             []
-            [ div [] [ text "Come on, Cowboys, gold and brown!" ]
-            , div [] [ text "Show them how, boys, hold them down!" ]
-            , div [] [ text "Start right now, boys, don't' delay," ]
-            , div [] [ text "Break away, win today." ]
-            , div [] [ text "Take that ball, and one, two, three!" ]
-            , div [] [ text "Carry on triumphantly -- Come on and fight!" ]
-            , div [] [ text "Fight! Fight, you Cowboys, fight!" ]
-            , div [] [ text "Come on and fight to victory!" ]
+            [ li [] [ text "Champion an Equitable COVID19 Response" ]
+            , li [] [ text "Advocate for Seniors" ]
+            , li [] [ text "Support Small Businesses" ]
+            , li [] [ text "Protect LGBTQ+ Rights" ]
+            , li [] [ text "Fight for Quality Education" ]
+            , li [] [ text "Enforce an End to Domestic Violence" ]
+            , li [] [ text "Reform the Criminal Justice System" ]
+            , li [] [ text "Improve Public Safety and Transportation" ]
+            , li [] [ text "Address Mental Healthcare, Healthcare Disparities & Substance Abuse Issues" ]
+            , li [] [ text "Act to prevent Homelessness and Ensure Access to Affordable Housing" ]
+            , li [] [ text "Secure Economic Justice & Worker Rights for Essential Workers" ]
+            , li [] [ text "Combat Climate Change and End Environmental Racism" ]
             ]
         ]

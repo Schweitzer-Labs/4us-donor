@@ -273,7 +273,7 @@ searchDollarGlyph =
 
 placeholderHeadshot : Image
 placeholderHeadshot =
-    image "josh-allen.jpeg"
+    image "shawna.png"
 
 
 johnSaffordHeadShot : Image
