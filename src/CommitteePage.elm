@@ -16,7 +16,7 @@ view : String -> Html msg -> { title : String, body : List (Html msg) }
 view committeeId form =
     -- @Todo formulate less hacky approach to catch demo committees
     if String.length committeeId >= 20 then
-        { title = "Shana Harmongoff Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
+        { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
 
     else
         case committeeId of

@@ -22,11 +22,11 @@ emailBody =
 
 promoHeading : Html msg
 promoHeading =
-    text "Shana Harmongoff for Senator"
+    text "Will Schweitzer for Supervisor"
 
 
 firstHeading =
-    "Fight, Wyoming, Fight"
+    "Capable"
 
 
 firstCopy =
@@ -34,7 +34,7 @@ firstCopy =
 
 
 secondHeading =
-    "Go"
+    "Responsible"
 
 
 secondCopy =
@@ -42,44 +42,44 @@ secondCopy =
 
 
 thirdHeading =
-    "Buffalo"
+    "Considerate"
 
 
 thirdCopy =
     "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
 
+promoContent : Html msg
+promoContent =
+    div
+        []
+        (promoCopyFormatter firstHeading firstCopy
+            ++ promoCopyFormatter secondHeading secondCopy
+            ++ promoCopyFormatter thirdHeading thirdCopy
+        )
+
+
 
 --promoContent : Html msg
 --promoContent =
---    div
---        []
---        (promoCopyFormatter firstHeading firstCopy
---            ++ promoCopyFormatter secondHeading secondCopy
---            ++ promoCopyFormatter thirdHeading thirdCopy
---        )
-
-
-promoContent : Html msg
-promoContent =
-    div []
-        [ h4
-            [ Spacing.mt3 ]
-            [ text "Your Neighbor, Your Voice" ]
-        , div [] [ text "As your neighbor and your voice in the New York State Senate Shana Harmongoff will..." ]
-        , div
-            []
-            [ li [] [ text "Champion an Equitable COVID19 Response" ]
-            , li [] [ text "Advocate for Seniors" ]
-            , li [] [ text "Support Small Businesses" ]
-            , li [] [ text "Protect LGBTQ+ Rights" ]
-            , li [] [ text "Fight for Quality Education" ]
-            , li [] [ text "Enforce an End to Domestic Violence" ]
-            , li [] [ text "Reform the Criminal Justice System" ]
-            , li [] [ text "Improve Public Safety and Transportation" ]
-            , li [] [ text "Address Mental Healthcare, Healthcare Disparities & Substance Abuse Issues" ]
-            , li [] [ text "Act to prevent Homelessness and Ensure Access to Affordable Housing" ]
-            , li [] [ text "Secure Economic Justice & Worker Rights for Essential Workers" ]
-            , li [] [ text "Combat Climate Change and End Environmental Racism" ]
-            ]
-        ]
+--    div []
+--        [ h4
+--            [ Spacing.mt3 ]
+--            [ text "Your Neighbor, Your Voice" ]
+--        , div [] [ text "As your neighbor and your voice in the New York State Senate Shana Harmongoff will..." ]
+--        , div
+--            []
+--            [ li [] [ text "Champion an Equitable COVID19 Response" ]
+--            , li [] [ text "Advocate for Seniors" ]
+--            , li [] [ text "Support Small Businesses" ]
+--            , li [] [ text "Protect LGBTQ+ Rights" ]
+--            , li [] [ text "Fight for Quality Education" ]
+--            , li [] [ text "Enforce an End to Domestic Violence" ]
+--            , li [] [ text "Reform the Criminal Justice System" ]
+--            , li [] [ text "Improve Public Safety and Transportation" ]
+--            , li [] [ text "Address Mental Healthcare, Healthcare Disparities & Substance Abuse Issues" ]
+--            , li [] [ text "Act to prevent Homelessness and Ensure Access to Affordable Housing" ]
+--            , li [] [ text "Secure Economic Justice & Worker Rights for Essential Workers" ]
+--            , li [] [ text "Combat Climate Change and End Environmental Racism" ]
+--            ]
+--        ]

@@ -44,11 +44,6 @@ usLogoWing =
     image "logo-hires-wing.png"
 
 
-joshAllen : Image
-joshAllen =
-    image "logo-hires-wing.png"
-
-
 blockchainDiamond : Image
 blockchainDiamond =
     image "blockchain-diamond.png"
@@ -265,15 +260,9 @@ searchDollarGlyph =
     glyph "fas fa-search-dollar"
 
 
-
---placeholderHeadshot : Image
---placeholderHeadshot =
---    image "placeholder-headshot.png"
-
-
 placeholderHeadshot : Image
 placeholderHeadshot =
-    image "shawna.png"
+    image "placeholder-headshot.png"
 
 
 johnSaffordHeadShot : Image
