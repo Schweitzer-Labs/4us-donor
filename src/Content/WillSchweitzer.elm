@@ -22,7 +22,7 @@ emailBody =
 
 promoHeading : Html msg
 promoHeading =
-    text "Will Schweitzer for Supervisor"
+    text "Will Schweitzer for Senator"
 
 
 firstHeading =
