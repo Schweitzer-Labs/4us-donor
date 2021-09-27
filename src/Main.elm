@@ -1400,6 +1400,7 @@ encodeContribution model =
             ++ optionalString "occupation" model.occupation
             ++ optionalString "refCode" model.ref
             ++ optionalString "addressLine2" model.address2
+            ++ optionalFieldOwners "owners" (Just model.owners)
 
 
 optionalString : String -> String -> List ( String, Value )
@@ -1409,6 +1410,15 @@ optionalString key val =
 
     else
         [ ( key, Encode.string val ) ]
+
+
+optionalFieldOwners : String -> Maybe Owner.Owners -> List ( String, Value )
+optionalFieldOwners key val =
+    if val == Just [] then
+        []
+
+    else
+        [ ( key, Encode.list Owner.encoder <| Maybe.withDefault [] val ) ]
 
 
 numberStringToInt : String -> Int
