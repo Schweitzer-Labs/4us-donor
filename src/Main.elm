@@ -1258,6 +1258,11 @@ emailAddressValidator =
     fromErrors emailAddressToErrors
 
 
+ownersPercentageValidator : Validator String Model
+ownersPercentageValidator =
+    fromErrors ownersPercentageToErrors
+
+
 postalCodeToErrors : Model -> List String
 postalCodeToErrors model =
     let
@@ -1293,6 +1298,19 @@ emailAddressToErrors model =
 
     else
         [ "Email Address is invalid" ]
+
+
+ownersPercentageToErrors : Model -> List String
+ownersPercentageToErrors model =
+    let
+        totalPercentage =
+            Owner.foldOwnership model.owners
+    in
+    if totalPercentage /= 100 then
+        [ "Total Percent ownership must equal 100%" ]
+
+    else
+        []
 
 
 piiValidator : Validator String Model
@@ -1354,7 +1372,9 @@ orgInfoValidator model =
     let
         extra =
             if isLLCDonor model then
-                [ ifEmptyList .owners "Please specify the ownership breakdown for your LLC." ]
+                [ ifEmptyList .owners "Please specify the ownership breakdown for your LLC."
+                , ownersPercentageValidator
+                ]
 
             else
                 []
