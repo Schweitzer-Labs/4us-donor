@@ -1,5 +1,6 @@
-module Owners exposing (Owner, Owners, foldOwnership, toFullName, toHash, validator)
+module Owners exposing (Owner, Owners, encoder, foldOwnership, toFullName, toHash, validator)
 
+import Json.Encode as Encode
 import Validate exposing (Validator, ifBlank, ifFalse, isFloat)
 
 
@@ -61,3 +62,17 @@ foldOwnership : Owners -> Float
 foldOwnership owners =
     List.foldl (+) 0 <|
         List.map (Maybe.withDefault 0 << String.toFloat << .percentOwnership) owners
+
+
+encoder : Owner -> Encode.Value
+encoder owner =
+    Encode.object
+        [ ( "firstName", Encode.string owner.firstName )
+        , ( "lastName", Encode.string owner.lastName )
+        , ( "addressLine1", Encode.string owner.address1 )
+        , ( "addressLine2", Encode.string owner.address2 )
+        , ( "city", Encode.string owner.city )
+        , ( "state", Encode.string owner.state )
+        , ( "postalCode", Encode.string owner.postalCode )
+        , ( "percentOwnership", Encode.string owner.percentOwnership )
+        ]

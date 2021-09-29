@@ -450,6 +450,7 @@ type Msg
     | UpdateOrganizationClassification (Maybe EntityType.Model)
     | UpdateFamilyOrIndividual EntityType.Model
     | AddOwner
+    | DeleteOwner Owner
     | UpdateOwnerFirstName String
     | UpdateOwnerLastName String
     | UpdateOwnerAddress1 String
@@ -599,6 +600,13 @@ update msg model =
                     withoutOwner ++ [ newOwner ]
             in
             ( { model | owners = withNewOwner }, Cmd.none )
+
+        DeleteOwner deletedOwner ->
+            let
+                newOwners =
+                    List.filter (\owner -> Owner.toHash owner /= Owner.toHash deletedOwner) model.owners
+            in
+            ( { model | owners = newOwners }, Cmd.none )
 
         AddOwner ->
             let
@@ -865,31 +873,6 @@ isLLCDonor model =
 
 manageOwnerRows : Model -> List (Html Msg)
 manageOwnerRows model =
-    let
-        tableBody =
-            Table.tbody [] <|
-                List.map
-                    (\owner ->
-                        Table.tr []
-                            [ Table.td [] [ text <| Owner.toFullName owner ]
-                            , Table.td [] [ text owner.percentOwnership ]
-                            ]
-                    )
-                    model.owners
-
-        tableHead =
-            Table.simpleThead
-                [ Table.th [] [ text "Name" ]
-                , Table.th [] [ text "Percent Ownership" ]
-                ]
-
-        capTable =
-            if List.length model.owners > 0 then
-                [ Table.simpleTable ( tableHead, tableBody ) ]
-
-            else
-                []
-    in
     [ Grid.row
         [ Row.attrs [ Spacing.mt3, Spacing.mb3 ] ]
         [ Grid.col
@@ -905,7 +888,7 @@ manageOwnerRows model =
             ]
         ]
     ]
-        ++ capTable
+        ++ [ capTable model ]
         ++ [ Grid.row
                 [ Row.attrs [ Spacing.mt3 ] ]
                 [ Grid.col
@@ -953,6 +936,35 @@ manageOwnerRows model =
                     [ submitButton AddOwner "Add another member" False True ]
                 ]
            ]
+
+
+tableBody model =
+    Table.tbody [] <|
+        List.map
+            (\owner ->
+                Table.tr []
+                    [ Table.td [] [ text <| Owner.toFullName owner ]
+                    , Table.td [] [ text owner.percentOwnership ]
+                    , Table.td [] [ span [ onClick <| DeleteOwner owner ] [ Asset.deleteGlyph [ class "text-danger cursor-pointer" ] ] ]
+                    ]
+            )
+            model.owners
+
+
+tableHead =
+    Table.simpleThead
+        [ Table.th [] [ text "Name" ]
+        , Table.th [] [ text "Percent Ownership" ]
+        , Table.th [] [ text "" ]
+        ]
+
+
+capTable model =
+    if List.length model.owners > 0 then
+        div [] [ Table.simpleTable ( tableHead, tableBody model ) ]
+
+    else
+        div [] []
 
 
 orgRows : Model -> List (Html Msg)
@@ -1246,6 +1258,11 @@ emailAddressValidator =
     fromErrors emailAddressToErrors
 
 
+ownersPercentageValidator : Validator String Model
+ownersPercentageValidator =
+    fromErrors ownersPercentageToErrors
+
+
 postalCodeToErrors : Model -> List String
 postalCodeToErrors model =
     let
@@ -1281,6 +1298,19 @@ emailAddressToErrors model =
 
     else
         [ "Email Address is invalid" ]
+
+
+ownersPercentageToErrors : Model -> List String
+ownersPercentageToErrors model =
+    let
+        totalPercentage =
+            Owner.foldOwnership model.owners
+    in
+    if totalPercentage /= 100 then
+        [ "Total Percent ownership must equal 100%" ]
+
+    else
+        []
 
 
 piiValidator : Validator String Model
@@ -1342,7 +1372,9 @@ orgInfoValidator model =
     let
         extra =
             if isLLCDonor model then
-                [ ifEmptyList .owners "Please specify the ownership breakdown for your LLC." ]
+                [ ifEmptyList .owners "Please specify the ownership breakdown for your LLC."
+                , ownersPercentageValidator
+                ]
 
             else
                 []
@@ -1400,6 +1432,7 @@ encodeContribution model =
             ++ optionalString "occupation" model.occupation
             ++ optionalString "refCode" model.ref
             ++ optionalString "addressLine2" model.address2
+            ++ optionalFieldOwners "owners" (Just model.owners)
 
 
 optionalString : String -> String -> List ( String, Value )
@@ -1409,6 +1442,15 @@ optionalString key val =
 
     else
         [ ( key, Encode.string val ) ]
+
+
+optionalFieldOwners : String -> Maybe Owner.Owners -> List ( String, Value )
+optionalFieldOwners key val =
+    if val == Just [] then
+        []
+
+    else
+        [ ( key, Encode.list Owner.encoder <| Maybe.withDefault [] val ) ]
 
 
 numberStringToInt : String -> Int
