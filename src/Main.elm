@@ -25,6 +25,7 @@ import Http exposing (Error(..), Expect, jsonBody, post)
 import Http.Detailed
 import Json.Decode as Decode exposing (bool, decodeValue)
 import Json.Encode as Encode exposing (Value)
+import Jurisdiction
 import OrgOrInd
 import Owners as Owner exposing (Owner, Owners)
 import SelectRadio
@@ -108,6 +109,7 @@ type alias Model =
     , ref : String
     , cardNumberIsVisible : Bool
     , settings : Settings.Model
+    , jurisdiction : Jurisdiction.Model
     }
 
 
@@ -126,11 +128,12 @@ amountParser =
 type alias Config =
     { host : String
     , apiEndpoint : String
+    , jurisdiction : String
     }
 
 
 init : Config -> ( Model, Cmd Msg )
-init { host, apiEndpoint } =
+init { host, apiEndpoint, jurisdiction } =
     case Url.fromString host of
         Just url ->
             let
@@ -145,15 +148,18 @@ init { host, apiEndpoint } =
 
                 amount =
                     Maybe.withDefault "" <| Maybe.withDefault (Just "") <| parse amountParser normalizedUrl
+
+                adminArea =
+                    Jurisdiction.fromString jurisdiction
             in
-            ( initModel apiEndpoint committeeId ref amount, Cmd.none )
+            ( initModel apiEndpoint committeeId ref amount adminArea, Cmd.none )
 
         Nothing ->
-            ( initModel apiEndpoint "" "" "", Cmd.none )
+            ( initModel apiEndpoint "" "" "" Jurisdiction.NYState, Cmd.none )
 
 
-initModel : String -> String -> String -> String -> Model
-initModel endpoint committeeId ref amount =
+initModel : String -> String -> String -> String -> Jurisdiction.Model -> Model
+initModel endpoint committeeId ref amount jurisdiction =
     let
         settings =
             Settings.get committeeId
@@ -206,6 +212,7 @@ initModel endpoint committeeId ref amount =
     , ownerState = ""
     , ownerPostalCode = ""
     , settings = Settings.get committeeId
+    , jurisdiction = jurisdiction
     }
 
 
@@ -1109,27 +1116,32 @@ employmentStatusRows : Model -> List (Html Msg)
 employmentStatusRows model =
     let
         currentVal =
-            Maybe.withDefault "" <| Maybe.map EmploymentStatus.toString model.employmentStatus
+            EmploymentStatus.toString model.employmentStatus
     in
-    [ Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
-        [ Grid.col
-            []
-            [ text "Employment status:" ]
-        ]
-    , Grid.row
-        [ Row.attrs [ Spacing.mt3 ] ]
-        [ Grid.col
-            []
-          <|
-            Radio.radioList "employmentStatus"
-                [ SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Employed) "Employed" "Employed" <| currentVal
-                , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Unemployed) "Unemployed" "Unemployed" <| currentVal
-                , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Retired) "Retired" "Retired" <| currentVal
-                , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.SelfEmployed) "SelfEmployed" "Self Employed" <| currentVal
+    case model.jurisdiction of
+        Jurisdiction.MAState ->
+            [ Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    []
+                    [ text "Employment status:" ]
                 ]
-        ]
-    ]
+            , Grid.row
+                [ Row.attrs [ Spacing.mt3 ] ]
+                [ Grid.col
+                    []
+                  <|
+                    Radio.radioList "employmentStatus"
+                        [ SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Employed) "Employed" "Employed" <| currentVal
+                        , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Unemployed) "Unemployed" "Unemployed" <| currentVal
+                        , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.Retired) "Retired" "Retired" <| currentVal
+                        , SelectRadio.view (UpdateEmploymentStatus EmploymentStatus.SelfEmployed) "SelfEmployed" "Self Employed" <| currentVal
+                        ]
+                ]
+            ]
+
+        _ ->
+            []
 
 
 needEmployerName : Maybe EmploymentStatus -> Bool
@@ -1344,19 +1356,32 @@ organizationValidator =
 
 indInfoValidator : Validator String Model
 indInfoValidator =
-    Validate.firstError [ piiValidator, familyValidator, employmentValidator ]
+    Validate.firstError [ piiValidator, familyValidator, employmentStatusValidator ]
 
 
 indInfoAndEmployer : Validator String Model
 indInfoAndEmployer =
-    Validate.firstError [ piiValidator, familyValidator, employmentValidator, employerValidator ]
+    Validate.firstError [ piiValidator, familyValidator, employmentStatusValidator, employerValidator ]
 
 
-employmentValidator : Validator String Model
-employmentValidator =
-    Validate.all
-        [ ifNothing .employmentStatus "Please specify your employment status."
-        ]
+employmentStatusValidator : Validator String Model
+employmentStatusValidator =
+    fromErrors employmentStatusToErrors
+
+
+employmentStatusToErrors : Model -> List String
+employmentStatusToErrors model =
+    case model.jurisdiction of
+        Jurisdiction.MAState ->
+            case model.employmentStatus of
+                Nothing ->
+                    [ "Please specify your employment status" ]
+
+                _ ->
+                    []
+
+        Jurisdiction.NYState ->
+            []
 
 
 employerValidator : Validator String Model
@@ -1422,11 +1447,11 @@ encodeContribution model =
         , ( "cardExpirationMonth", Encode.int <| numberStringToInt model.expirationMonth )
         , ( "cardExpirationYear", Encode.int <| numberStringToInt model.expirationYear )
         , ( "cardCVC", Encode.string model.cvv )
-        , ( "employmentStatus", Encode.string <| Maybe.withDefault "" <| Maybe.map EmploymentStatus.toString model.employmentStatus )
         , ( "attestsToBeingAnAdultCitizen", Encode.bool model.attestation )
 
         --, ( "middleName", Encode.string model.middleName )
         ]
+            ++ optionalString "employmentStatus" (EmploymentStatus.toString model.employmentStatus)
             ++ optionalString "entityName" model.entityName
             ++ optionalString "employer" model.employer
             ++ optionalString "occupation" model.occupation

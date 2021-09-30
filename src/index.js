@@ -6,12 +6,25 @@ import {verifyPhone} from "./js/phone";
 import {verifyEmail} from "./js/email-validator";
 
 const apiEndpoint = process.env.ELM_APP_API_ENDPOINT
+const config = JSON.parse(document.getElementById("config").text)
+
+const urlObj = new URL(window.location.href)
+const pathName = urlObj.pathname
+const committeeID = pathName.replace('/committee/', '')
+
+const validateCommitteeID = () =>{
+  if (committeeID === 'ian-cain') {
+    return 'MA'
+  } else return config.jurisdiction
+}
+
 
 const app = Elm.Main.init({
   node: document.getElementById(elmAppId),
   flags: {
     host: window.location.href,
-    apiEndpoint
+    apiEndpoint,
+    jurisdiction: validateCommitteeID()
   }
 });
 
