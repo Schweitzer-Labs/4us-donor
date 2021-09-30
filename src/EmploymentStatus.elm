@@ -8,17 +8,20 @@ type EmploymentStatus
     | Unemployed
 
 
-toString : EmploymentStatus -> String
+toString : Maybe EmploymentStatus -> String
 toString val =
     case val of
-        Employed ->
+        Just Employed ->
             "Employed"
 
-        SelfEmployed ->
+        Just SelfEmployed ->
             "SelfEmployed"
 
-        Retired ->
+        Just Retired ->
             "Retired"
 
-        Unemployed ->
+        Just Unemployed ->
             "Unemployed"
+
+        Nothing ->
+            ""
