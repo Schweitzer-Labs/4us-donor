@@ -6,14 +6,14 @@ import {verifyPhone} from "./js/phone";
 import {verifyEmail} from "./js/email-validator";
 
 const apiEndpoint = process.env.ELM_APP_API_ENDPOINT
-const jurisdiction = 'NY'
+const config = JSON.parse(document.getElementById("config").text)
 
 const app = Elm.Main.init({
   node: document.getElementById(elmAppId),
   flags: {
     host: window.location.href,
     apiEndpoint,
-    jurisdiction
+    jurisdiction: config.jurisdiction
   }
 });
 
