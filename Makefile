@@ -1,30 +1,24 @@
 SHELL			:= bash
 export SUBDOMAIN	:= donate
 export PRODUCT		:= 4us
-
-ifeq ($(RUNENV), )
-       export RUNENV	:= qa
-endif
+REPO_NAME		:= 4us-donor
 
 # Deduce the Domain related parameters based on the RUNENV and PRODUCT params
-ifeq ($(RUNENV), qa)
-	export DOMAIN   := build4
-	export TLD      := us
-else ifeq ($(RUNENV), prod)
+ifeq ($(RUNENV), prod)
 	export DOMAIN   := 4us
 	export TLD      := net
-else ifeq ($(RUNENV), demo)
+ifeq ($(RUNENV), demo)
 	export DOMAIN   := 4usdemo
 	export TLD      := com
+else
+	export RUNENV	:= qa
+	export DOMAIN   := build4
+	export TLD      := us
 endif
 
 export BUILD_DIR	:= $(PWD)/build
 
 API_ENDPOINT	:= https://$(SUBDOMAIN)-api.$(DOMAIN).$(TLD)/api/platform/contribute
-
-export CF_PAGES_BRANCH	:= $(CF_PAGES_BRANCH)
-export SLACK_HOOK	:= $(SLACK_HOOK)
-SLACK_URL       := https://hooks.slack.com/services/$(SLACK_HOOK)
 
 .PHONY: all dep build clean
 
@@ -50,13 +44,10 @@ build: $(BUILD_DIR) dep
 		run build
 
 cloudflare-web: build
-	curl \
-                -X POST \
-                -H 'Content-type: application/json' \
-                --data '{"text":"Build succeeded: $(CF_PAGES_BRANCH) branch of 4us-donor"}' $(SLACK_URL)
+	bash send_slack.sh $(REPO_NAME) succeeded
+
+cloudflare-begin:
+	bash send_slack.sh $(REPO_NAME) started
 
 cloudflare-failed:
-	curl \
-                -X POST \
-                -H 'Content-type: application/json' \
-                --data '{"text":"Build failed: $(CF_PAGES_BRANCH) branch of 4us-donor"}' $(SLACK_URL)
+	bash send_slack.sh $(REPO_NAME) failed
