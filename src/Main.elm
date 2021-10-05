@@ -587,6 +587,9 @@ update msg model =
                         Just OrgOrInd.Org ->
                             Just EmploymentStatus.Employed
 
+                        Just OrgOrInd.Ind ->
+                            Nothing
+
                         _ ->
                             model.employmentStatus
             in
