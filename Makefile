@@ -7,7 +7,7 @@ REPO_NAME		:= 4us-donor
 ifeq ($(RUNENV), prod)
 	export DOMAIN   := 4us
 	export TLD      := net
-ifeq ($(RUNENV), demo)
+else ifeq ($(RUNENV), demo)
 	export DOMAIN   := 4usdemo
 	export TLD      := com
 else
