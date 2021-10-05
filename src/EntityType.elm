@@ -194,13 +194,6 @@ candidateRelationshipRadioList msg currentValue =
             , Radio.checked (currentValue == Just Individual)
             ]
             "Not Related"
-        , Radio.createCustom
-            [ Radio.id "can"
-            , Radio.inline
-            , Radio.onClick (msg Candidate)
-            , Radio.checked (currentValue == Just Candidate)
-            ]
-            "The candidate or spouse of the candidate"
         , Radio.createCustomAdvanced
             [ Radio.id "fam"
             , Radio.inline
