@@ -4,17 +4,18 @@ import Bootstrap.Form as Form
 import Bootstrap.Form.Checkbox as Checkbox
 import Bootstrap.Form.Input as Input
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (attribute, class)
 
 
-inputNumber : (String -> msg) -> String -> String -> String -> Html msg
-inputNumber msg placeholder val label =
+inputNumber : (String -> msg) -> String -> String -> String -> String -> Html msg
+inputNumber msg placeholder val label testAttr =
     Form.group []
         [ Form.label [] [ text label ]
         , Input.text
             [ Input.value val
             , Input.onInput msg
             , Input.placeholder placeholder
+            , Input.attrs [ attribute "data-cy" testAttr ]
             ]
         ]
 
@@ -28,32 +29,34 @@ inputMonth msg placeholder val =
         ]
 
 
-inputText : (String -> msg) -> String -> String -> String -> Html msg
-inputText msg placeholder val label =
+inputText : (String -> msg) -> String -> String -> String -> String -> Html msg
+inputText msg placeholder val label testAttr =
     Form.group []
         [ Form.label [] [ text label ]
         , Input.text
             [ Input.value val
             , Input.onInput msg
             , Input.placeholder placeholder
+            , Input.attrs [ attribute "data-cy" testAttr ]
             ]
         ]
 
 
-inputSecure : (String -> msg) -> String -> String -> String -> Html msg
-inputSecure msg placeholder val label =
+inputSecure : (String -> msg) -> String -> String -> String -> String -> Html msg
+inputSecure msg placeholder val label testAttr =
     Form.group []
         [ Form.label [] [ text label ]
         , Input.password
             [ Input.value val
             , Input.onInput msg
             , Input.placeholder placeholder
+            , Input.attrs [ attribute "data-cy" testAttr ]
             ]
         ]
 
 
-inputToggleSecure : (String -> msg) -> String -> String -> Bool -> (Bool -> msg) -> String -> Html msg
-inputToggleSecure msg placeholder val isVisible toVisibleMsg label =
+inputToggleSecure : (String -> msg) -> String -> String -> Bool -> (Bool -> msg) -> String -> String -> Html msg
+inputToggleSecure msg placeholder val isVisible toVisibleMsg label testAttr =
     let
         inputType =
             if isVisible then
@@ -69,6 +72,7 @@ inputToggleSecure msg placeholder val isVisible toVisibleMsg label =
             [ Input.value val
             , Input.onInput msg
             , Input.placeholder placeholder
+            , Input.attrs [ attribute "data-cy" testAttr ]
             ]
         , Checkbox.checkbox
             [ Checkbox.checked isVisible
@@ -78,13 +82,14 @@ inputToggleSecure msg placeholder val isVisible toVisibleMsg label =
         ]
 
 
-inputEmail : (String -> msg) -> String -> String -> String -> Html msg
-inputEmail msg placeholder val label =
+inputEmail : (String -> msg) -> String -> String -> String -> String -> Html msg
+inputEmail msg placeholder val label testAttr =
     Form.group []
         [ Form.label [ class "font-weight-light" ] [ text label ]
         , Input.email
             [ Input.value val
             , Input.onInput msg
             , Input.placeholder placeholder
+            , Input.attrs [ attribute "data-cy" testAttr ]
             ]
         ]
