@@ -22,6 +22,10 @@ export BUILD_DIR	:= $(PWD)/build
 
 API_ENDPOINT	:= https://$(SUBDOMAIN)-api.$(DOMAIN).$(TLD)/api/platform/contribute
 
+export CF_PAGES_BRANCH	:= $(CF_PAGES_BRANCH)
+export SLACK_HOOK	:= $(SLACK_HOOK)
+SLACK_URL       := https://hooks.slack.com/services/$(SLACK_HOOK)
+
 .PHONY: all dep build clean
 
 # Make targets
@@ -44,3 +48,15 @@ build: $(BUILD_DIR) dep
 		--subdomain=$(SUBDOMAIN) --domain=$(DOMAIN) --tld=$(TLD) \
 		--apiendpoint=$(API_ENDPOINT) \
 		run build
+
+cloudflare-web: build
+	curl \
+                -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"Build succeeded: $(CF_PAGES_BRANCH) branch of 4us-donor"}' $(SLACK_URL)
+
+cloudflare-failed:
+	curl \
+                -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"Build failed: $(CF_PAGES_BRANCH) branch of 4us-donor"}' $(SLACK_URL)
