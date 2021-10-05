@@ -7,16 +7,13 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (attribute, class)
 
 
-inputNumber : (String -> msg) -> String -> String -> String -> String -> Html msg
-inputNumber msg placeholder val label testAttr =
-    Form.group []
-        [ Form.label [] [ text label ]
-        , Input.text
-            [ Input.value val
-            , Input.onInput msg
-            , Input.placeholder placeholder
-            , Input.attrs [ attribute "data-cy" testAttr ]
-            ]
+inputNumber : (String -> msg) -> String -> String -> String -> Html msg
+inputNumber msg placeholder val testAttr =
+    Input.text
+        [ Input.value val
+        , Input.onInput msg
+        , Input.placeholder placeholder
+        , Input.attrs [ attribute "data-cy" testAttr ]
         ]
 
 
@@ -29,29 +26,23 @@ inputMonth msg placeholder val =
         ]
 
 
-inputText : (String -> msg) -> String -> String -> String -> String -> Html msg
-inputText msg placeholder val label testAttr =
-    Form.group []
-        [ Form.label [] [ text label ]
-        , Input.text
-            [ Input.value val
-            , Input.onInput msg
-            , Input.placeholder placeholder
-            , Input.attrs [ attribute "data-cy" testAttr ]
-            ]
+inputText : (String -> msg) -> String -> String -> String -> Html msg
+inputText msg placeholder val testAttr =
+    Input.text
+        [ Input.value val
+        , Input.onInput msg
+        , Input.placeholder placeholder
+        , Input.attrs [ attribute "data-cy" testAttr ]
         ]
 
 
-inputSecure : (String -> msg) -> String -> String -> String -> String -> Html msg
-inputSecure msg placeholder val label testAttr =
-    Form.group []
-        [ Form.label [] [ text label ]
-        , Input.password
-            [ Input.value val
-            , Input.onInput msg
-            , Input.placeholder placeholder
-            , Input.attrs [ attribute "data-cy" testAttr ]
-            ]
+inputSecure : (String -> msg) -> String -> String -> String -> Html msg
+inputSecure msg placeholder val testAttr =
+    Input.password
+        [ Input.value val
+        , Input.onInput msg
+        , Input.placeholder placeholder
+        , Input.attrs [ attribute "data-cy" testAttr ]
         ]
 
 
@@ -67,8 +58,7 @@ inputToggleSecure msg placeholder val isVisible toVisibleMsg label testAttr =
     in
     Form.group
         []
-        [ Form.label [] [ text label ]
-        , inputType
+        [ inputType
             [ Input.value val
             , Input.onInput msg
             , Input.placeholder placeholder
@@ -82,14 +72,11 @@ inputToggleSecure msg placeholder val isVisible toVisibleMsg label testAttr =
         ]
 
 
-inputEmail : (String -> msg) -> String -> String -> String -> String -> Html msg
-inputEmail msg placeholder val label testAttr =
-    Form.group []
-        [ Form.label [ class "font-weight-light" ] [ text label ]
-        , Input.email
-            [ Input.value val
-            , Input.onInput msg
-            , Input.placeholder placeholder
-            , Input.attrs [ attribute "data-cy" testAttr ]
-            ]
+inputEmail : (String -> msg) -> String -> String -> String -> Html msg
+inputEmail msg placeholder val testAttr =
+    Input.email
+        [ Input.value val
+        , Input.onInput msg
+        , Input.placeholder placeholder
+        , Input.attrs [ attribute "data-cy" testAttr ]
         ]

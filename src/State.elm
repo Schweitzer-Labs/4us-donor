@@ -79,17 +79,14 @@ withStateKeys =
     Dict.fromList <| List.map (\( a, b ) -> ( b, a )) statesAndAbbrsList
 
 
-view : (String -> msg) -> String -> String -> String -> Html msg
-view msg currentValue label testAttr =
-    Form.group []
-        [ Form.label [] [ text label ]
-        , Select.select
-            [ Select.id "State", Select.onChange msg, Select.attrs [ attribute "data-cy" testAttr ] ]
-          <|
-            [ Select.item [ value "" ] [ text "-- State --" ] ]
-                ++ List.map
-                    (\( abbr, whole ) ->
-                        Select.item [ value abbr, selected (currentValue == abbr) ] [ text whole ]
-                    )
-                    statesAndAbbrsList
-        ]
+view : (String -> msg) -> String -> String -> Html msg
+view msg currentValue testAttr =
+    Select.select
+        [ Select.id "State", Select.onChange msg, Select.attrs [ attribute "data-cy" testAttr ] ]
+    <|
+        [ Select.item [ value "" ] [ text "-- State --" ] ]
+            ++ List.map
+                (\( abbr, whole ) ->
+                    Select.item [ value abbr, selected (currentValue == abbr) ] [ text whole ]
+                )
+                statesAndAbbrsList

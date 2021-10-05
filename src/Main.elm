@@ -903,37 +903,37 @@ manageOwnerRows model =
                 [ Row.attrs [ Spacing.mt3 ] ]
                 [ Grid.col
                     []
-                    [ inputText UpdateOwnerFirstName "Enter First Name" model.ownerFirstName "First Name" "contribOrgfirstName" ]
+                    [ inputText UpdateOwnerFirstName "First Name" model.ownerFirstName "contribOrgfirstName" ]
                 , Grid.col
                     []
-                    [ inputText UpdateOwnerLastName "Enter Last Name" model.ownerLastName "Last Name" "contribOrgLastName" ]
+                    [ inputText UpdateOwnerLastName "Last Name" model.ownerLastName "contribOrgLastName" ]
                 ]
            , Grid.row
                 [ Row.attrs [ Spacing.mt3 ] ]
                 [ Grid.col
                     []
-                    [ inputText UpdateOwnerAddress1 "Enter Address 1" model.ownerAddress1 "Address 1" "contribOrgAddress1" ]
+                    [ inputText UpdateOwnerAddress1 "Address 1" model.ownerAddress1 "contribOrgAddress1" ]
                 , Grid.col
                     []
-                    [ inputText UpdateOwnerAddress2 "Enter Address 2" model.ownerAddress2 "Address 2" "contribOrgAddress2" ]
+                    [ inputText UpdateOwnerAddress2 "Address 2" model.ownerAddress2 "contribOrgAddress2" ]
                 ]
            , Grid.row
                 [ Row.attrs [ Spacing.mt3 ] ]
                 [ Grid.col
                     []
-                    [ inputText UpdateOwnerCity "Enter City" model.ownerCity "City" "contribOrgCity" ]
+                    [ inputText UpdateOwnerCity "City" model.ownerCity "contribOrgCity" ]
                 , Grid.col
                     []
-                    [ State.view UpdateOwnerState model.ownerState "State" "contribOrgState" ]
+                    [ State.view UpdateOwnerState model.ownerState "contribOrgState" ]
                 , Grid.col
                     []
-                    [ inputText UpdateOwnerPostalCode "Enter Postal Code" model.ownerPostalCode "Postal Code" "contribOrgPostalCode" ]
+                    [ inputText UpdateOwnerPostalCode "Postal Code" model.ownerPostalCode "contribOrgPostalCode" ]
                 ]
            , Grid.row
                 [ Row.attrs [ Spacing.mt3 ] ]
                 [ Grid.col
                     []
-                    [ inputNumber UpdateOwnerOwnership "Enter Percent Ownership" model.ownerOwnership "Percent Ownership" "contribOrgPercentOwnership" ]
+                    [ inputNumber UpdateOwnerOwnership "Percent Ownership" model.ownerOwnership "contribOrgPercentOwnership" ]
                 ]
            , Grid.row
                 [ Row.attrs [ Spacing.mt3 ] ]
@@ -995,7 +995,7 @@ orgRows model =
                 [ Row.attrs [ Spacing.mt3 ] ]
                 [ Grid.col
                     []
-                    [ inputText UpdateOrganizationName "Enter Organization Name" model.entityName "Organization Name" "contribOrgPostalCode"
+                    [ inputText UpdateOrganizationName "Organization Name" model.entityName "contribOrgPostalCode"
                     ]
                 ]
            ]
@@ -1012,40 +1012,40 @@ piiRows model =
         [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
             [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
-            [ inputEmail UpdateEmailAddress "Enter Email" model.emailAddress "Email" "contribIndEmail" ]
+            [ inputEmail UpdateEmailAddress "Email" model.emailAddress "contribIndEmail" ]
         , Grid.col
             [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
-            [ inputText UpdatePhoneNumber "Enter Phone Number" model.phoneNumber "Phone" "contribIndPhoneNumber" ]
+            [ inputText UpdatePhoneNumber "Phone Number" model.phoneNumber "contribIndPhoneNumber" ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
             [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
-            [ inputText UpdateFirstName "Enter First Name" model.firstName "First Name" "contribIndFirstName" ]
+            [ inputText UpdateFirstName "First Name" model.firstName "contribIndFirstName" ]
         , Grid.col
             [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
-            [ inputText UpdateLastName "Enter Last Name" model.lastName "Last Name" "contribIndLastName" ]
+            [ inputText UpdateLastName "Last Name" model.lastName "contribIndLastName" ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
             [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
-            [ inputText UpdateAddress1 "Enter Address 1" model.address1 "Address 1" "contribIndAddress1" ]
+            [ inputText UpdateAddress1 "Address 1" model.address1 "contribIndAddress1" ]
         , Grid.col
             [ Col.sm12, Col.md6, Col.attrs mobileColSpacing ]
-            [ inputText UpdateAddress2 "Enter Address 2" model.address2 "Address 2" "contribIndAddress2" ]
+            [ inputText UpdateAddress2 "Address 2" model.address2 "contribIndAddress2" ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
             [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
-            [ inputText UpdateCity "Enter City" model.city "City" "contribIndCity" ]
+            [ inputText UpdateCity "City" model.city "contribIndCity" ]
         , Grid.col
             [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
-            [ State.view UpdateState model.state "State" "contribIndState" ]
+            [ State.view UpdateState model.state "contribIndState" ]
         , Grid.col
             [ Col.sm12, Col.md4, Col.attrs mobileColSpacing ]
-            [ inputText UpdatePostalCode "Enter Zip" model.postalCode "Zip" "contribIndPostalCode" ]
+            [ inputText UpdatePostalCode "Zip" model.postalCode "contribIndPostalCode" ]
         ]
     ]
 
@@ -1097,10 +1097,10 @@ employerOccupationRow model =
         [ Row.attrs [ Spacing.mt3 ] ]
         [ Grid.col
             []
-            [ inputText UpdateEmployer "Enter Employer Name" model.employer "Employer Name" "contribIndEmployerName" ]
+            [ inputText UpdateEmployer "Employer Name" model.employer "contribIndEmployerName" ]
         , Grid.col
             []
-            [ inputText UpdateOccupation "Enter Occupation" model.occupation "Occupation" "contribIndOccupation" ]
+            [ inputText UpdateOccupation "Occupation" model.occupation "contribIndOccupation" ]
         ]
 
 
@@ -1178,7 +1178,7 @@ paymentDetailsRows model =
             []
             [ inputToggleSecure
                 UpdateCardNumber
-                "Enter Card Number*"
+                "Card Number*"
                 model.cardNumber
                 model.cardNumberIsVisible
                 ToggleCardNumberVisibility
@@ -1190,13 +1190,13 @@ paymentDetailsRows model =
         [ Row.attrs [ Spacing.mt3Md ] ]
         [ Grid.col
             [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
-            [ inputNumber UpdateExpirationMonth "MM*" model.expirationMonth "Expiration Month" "contribCCM" ]
+            [ inputNumber UpdateExpirationMonth "MM*" model.expirationMonth "contribCCM" ]
         , Grid.col
             [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
-            [ inputNumber UpdateExpirationYear "YYYY*" model.expirationYear "Expiration Year" "contribCCY" ]
+            [ inputNumber UpdateExpirationYear "YYYY*" model.expirationYear "contribCCY" ]
         , Grid.col
             [ Col.xs12, Col.md4, Col.attrs mobileColSpacing ]
-            [ inputSecure UpdateCVV "CVV*" model.cvv "Card Number" "contribCCV" ]
+            [ inputSecure UpdateCVV "CVV*" model.cvv "contribCCV" ]
         ]
     , Grid.row
         [ Row.attrs [ Spacing.mt4 ] ]
