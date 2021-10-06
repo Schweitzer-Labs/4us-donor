@@ -19,7 +19,7 @@ view selectMsg currentVal submitMsg buttonVisible =
                     [ Row.attrs [ Spacing.mt3 ] ]
                     [ Grid.col
                         []
-                        [ submitButton submitMsg "Continue" False True ]
+                        [ submitButton submitMsg "Continue" False True "amountBtn" ]
                     ]
                 ]
 

@@ -4,7 +4,7 @@ import Bootstrap.Form.Radio as Radio
 import Bootstrap.Form.Select as Select exposing (Item)
 import Bootstrap.Utilities.Spacing as Spacing
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class, selected, value)
+import Html.Attributes exposing (attribute, class, selected, value)
 
 
 type Model
@@ -187,13 +187,20 @@ orgSelect contributorType currentValue =
 candidateRelationshipRadioList : (Model -> msg) -> Maybe Model -> List (Html msg)
 candidateRelationshipRadioList msg currentValue =
     Radio.radioList "candidateRelationship"
-        [ Radio.createCustom
+        [ Radio.createCustomAdvanced
             [ Radio.id "ind"
             , Radio.inline
             , Radio.onClick (msg Individual)
             , Radio.checked (currentValue == Just Individual)
             ]
-            "Not Related"
+            (Radio.label [ attribute "data-cy" "contribIndNA" ] [ text "Not Related" ])
+        , Radio.createCustomAdvanced
+            [ Radio.id "can"
+            , Radio.inline
+            , Radio.onClick (msg Candidate)
+            , Radio.checked (currentValue == Just Candidate)
+            ]
+            (Radio.label [ attribute "data-cy" "contribIndCAN" ] [ text "The candidate or spouse of the candidate" ])
         , Radio.createCustomAdvanced
             [ Radio.id "fam"
             , Radio.inline
@@ -202,7 +209,12 @@ candidateRelationshipRadioList msg currentValue =
             ]
             (Radio.label []
                 [ text "Family member* of the candidate"
-                , div [ Spacing.mt1, Spacing.ml2 ] [ text "*Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ]
+                , div
+                    [ Spacing.mt1
+                    , Spacing.ml2
+                    , attribute "data-cy" "contribIndFAM"
+                    ]
+                    [ text "*Defined as the candidate's child, parent, grandparent, brother, or sister of any such persons " ]
                 ]
             )
         ]
