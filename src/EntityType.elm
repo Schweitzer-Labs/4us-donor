@@ -1,4 +1,4 @@
-module EntityType exposing (Model(..), candidateRelationshipRadioList, isLLC, llc, orgView, toDataString, toDisplayString)
+module EntityType exposing (Model(..), candidateRelationshipRadioList, isLLCorLLP, llc, orgView, toDataString, toDisplayString)
 
 import Bootstrap.Form.Radio as Radio
 import Bootstrap.Form.Select as Select exposing (Item)
@@ -220,9 +220,17 @@ candidateRelationshipRadioList msg currentValue =
         ]
 
 
-isLLC : Model -> Bool
-isLLC contributorType =
-    contributorType == LimitedLiabilityCompany
+isLLCorLLP : Maybe Model -> Bool
+isLLCorLLP contributorType =
+    case contributorType of
+        Just LimitedLiabilityCompany ->
+            True
+
+        Just PartnershipIncludingLLPs ->
+            True
+
+        _ ->
+            False
 
 
 llc : Model
