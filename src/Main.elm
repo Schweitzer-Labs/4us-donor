@@ -871,9 +871,9 @@ donateButton model =
     submitButton SubmitPaymentInfo "Donate!" model.submitting (model.submitting == False) "donateBtn"
 
 
-isLLCDonor : Model -> Bool
-isLLCDonor model =
-    Maybe.withDefault False (Maybe.map EntityType.isLLC model.maybeContributorType)
+isLLCorLLPDonor : Model -> Bool
+isLLCorLLPDonor model =
+    EntityType.isLLCorLLP model.maybeContributorType
 
 
 
@@ -977,7 +977,7 @@ orgRows : Model -> List (Html Msg)
 orgRows model =
     let
         llcRow =
-            if isLLCDonor model then
+            if isLLCorLLPDonor model then
                 manageOwnerRows model
 
             else
@@ -1390,7 +1390,7 @@ orgInfoValidator : Model -> Validator String Model
 orgInfoValidator model =
     let
         extra =
-            if isLLCDonor model then
+            if isLLCorLLPDonor model then
                 [ ifEmptyList .owners "Please specify the ownership breakdown for your LLC."
                 , ownersPercentageValidator
                 ]
