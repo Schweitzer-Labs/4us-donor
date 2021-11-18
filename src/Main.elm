@@ -15,6 +15,7 @@ import Browser exposing (Document)
 import Browser.Dom as Dom
 import CommitteePage
 import Content.IanCain as IanCain
+import Content.LuisSepulveda as LuisSepulveda
 import Copy
 import EmploymentStatus exposing (EmploymentStatus)
 import EntityType
@@ -232,6 +233,9 @@ footerCopy model =
     case model.committeeId of
         "ian-cain" ->
             IanCain.footerCopy
+
+        "luis-r-sepulveda" ->
+            LuisSepulveda.footerCopy
 
         _ ->
             []
