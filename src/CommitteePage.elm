@@ -7,6 +7,7 @@ import Bootstrap.Grid.Row as Row
 import Bootstrap.Utilities.Spacing as Spacing
 import Content.IanCain as IanCain
 import Content.JohnSafford as JohnSafford
+import Content.LuisSepulveda as LuisSepulveda
 import Content.WillSchweitzer as WillSchweitzer
 import Html exposing (Html, div, h1, img, p, text)
 import Html.Attributes exposing (class)
@@ -28,6 +29,9 @@ view committeeId form =
 
             "will-schweitzer" ->
                 { title = "Will Schweitzer Committee", body = committeePage WillSchweitzer.promoContent WillSchweitzer.promoHeading Asset.placeholderHeadshot form }
+
+            "luis-r-sepulveda" ->
+                { title = "Luis R. Sepulveda Committee", body = committeePage LuisSepulveda.promoContent LuisSepulveda.promoHeading Asset.luisSepulvedaHeadshot form }
 
             _ ->
                 { title = "Committee not found", body = [ div [] [ h1 [ class "text-center", Spacing.mt5 ] [ text "Committee not found" ] ] ] }

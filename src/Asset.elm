@@ -1,4 +1,4 @@
-module Asset exposing (Glyph(..), Image(..), amalgamatedLogo, arthurLogo, bellGlyph, binoculars, blockchainDiamond, calendar, checkCircle, checkCircleSelected, circleCheckGlyph, coinsGlyph, defaultAvatar, deleteGlyph, documents, eightX, error, finicityCircle, finicityCircleSelected, gearHires, genderNeutral, glyph, house, ianCainHeadshot, ianCainLogo, image, johnSaffordHeadShot, lineSelected, lineUnselected, linkGlyph, loading, minusCircleGlyph, person, placeholderHeadshot, plaidCircle, plaidCircleSelected, profileCircle, sackDollarGlyph, search, searchDollarGlyph, src, stripeCircle, stripeCircleSelected, stripeLogo, tbdBankLogo, universityGlyph, usLogo, usLogoWing, userGlyph, wiseLogo)
+module Asset exposing (Glyph(..), Image(..), amalgamatedLogo, arthurLogo, bellGlyph, binoculars, blockchainDiamond, calendar, checkCircle, checkCircleSelected, circleCheckGlyph, coinsGlyph, defaultAvatar, deleteGlyph, documents, eightX, error, finicityCircle, finicityCircleSelected, gearHires, genderNeutral, glyph, house, ianCainHeadshot, ianCainLogo, image, johnSaffordHeadShot, lineSelected, lineUnselected, linkGlyph, loading, luisSepulvedaHeadshot, minusCircleGlyph, person, placeholderHeadshot, plaidCircle, plaidCircleSelected, profileCircle, sackDollarGlyph, search, searchDollarGlyph, src, stripeCircle, stripeCircleSelected, stripeLogo, tbdBankLogo, universityGlyph, usLogo, usLogoWing, userGlyph, wiseLogo)
 
 {-| Assets, such as images, videos, and audio. (We only have images for now.)
 
@@ -107,6 +107,11 @@ ianCainHeadshot =
 ianCainLogo : Image
 ianCainLogo =
     image "ian-cain-logo.png"
+
+
+luisSepulvedaHeadshot : Image
+luisSepulvedaHeadshot =
+    image "luis-r-sepulveda.png"
 
 
 loading : Image
