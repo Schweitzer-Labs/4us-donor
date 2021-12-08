@@ -234,8 +234,8 @@ footerCopy model =
         "ian-cain" ->
             IanCain.footerCopy
 
-        "luis-r-sepulveda" ->
-            LuisSepulveda.footerCopy
+        --"luis-r-sepulveda" ->
+        --    LuisSepulveda.footerCopy
 
         _ ->
             []

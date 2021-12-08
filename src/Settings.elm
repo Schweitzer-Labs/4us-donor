@@ -22,8 +22,8 @@ get committeeId =
         "ian-cain" ->
             { complianceEnabled = False }
 
-        "luis-r-sepulveda" ->
-            { complianceEnabled = False }
+        --"luis-r-sepulveda" ->
+        --    { complianceEnabled = False }
 
         _ ->
             init
