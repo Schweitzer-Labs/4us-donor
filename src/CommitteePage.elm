@@ -6,7 +6,6 @@ import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
 import Bootstrap.Utilities.Spacing as Spacing
 import Content.IanCain as IanCain
-import Content.JohnSafford as JohnSafford
 import Content.LuisSepulveda as LuisSepulveda
 import Content.WillSchweitzer as WillSchweitzer
 import Html exposing (Html, div, h1, img, p, text)
@@ -21,9 +20,6 @@ view committeeId form =
 
     else
         case committeeId of
-            "john-safford" ->
-                { title = "John Safford Committee", body = committeePage JohnSafford.promoContent JohnSafford.promoHeading Asset.johnSaffordHeadShot form }
-
             "ian-cain" ->
                 { title = "Ian Cain Committee", body = committeePage IanCain.promoContent IanCain.promoHeading Asset.ianCainHeadshot form }
 
